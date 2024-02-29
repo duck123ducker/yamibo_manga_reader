@@ -67,4 +67,4 @@ const ImageLoader: React.FC<{ uri: string, width: number, height: number, resize
         }
     }
 };
-export default React.memo(ImageLoader);
+export default ImageLoader;

@@ -32,6 +32,7 @@ const Mangas: React.FC<{navigation}> = ({ navigation }) => {
     const [searchThreadList, setSearchThreadList] = useState([])
     const [viewableIds, setViewableIds] =useState([-1,-1])
     const [refreshing, setRefreshing] = useState(false);
+    const [searchThrottle, setSearchThrottle] = useState(false)
     const onRefresh = useCallback(() => {
         if(mode==='normal'){
             setRefreshing(true);
@@ -101,17 +102,30 @@ const Mangas: React.FC<{navigation}> = ({ navigation }) => {
         search(e.nativeEvent.text)
     }
     const search = (value) => {
+        if(scrollViewRef.current){
+            scrollViewRef.current.scrollTo({x: 0, y: 0, animated: false})
+        }
         if(!!value.trim()){
-            setMode('search')
-            setLoading(true)
-            searchThread(value.trim()).then(res=>{
-                setSearchThreadList(res.threadList)
-                setNextSearchPage(res.nextPageUrl)
-                setLoading(false)
-                if(res.threadList.length===0){
-                    Toast.show('无结果', { position: 0 })
-                }
-            })
+            if(!searchThrottle){
+                setSearchThreadList([])
+                setNextSearchPage('')
+                setMode('search')
+                setLoading(true)
+                searchThread(value.trim()).then(res=>{
+                    setSearchThreadList(res.threadList)
+                    setNextSearchPage(res.nextPageUrl)
+                    setLoading(false)
+                    setSearchThrottle(true)
+                    setTimeout(()=>{
+                        setSearchThrottle(false)
+                    },10000)
+                    if(res.threadList.length===0){
+                        Toast.show('无结果', { position: 0 })
+                    }
+                })
+            }else{
+                Toast.show('10秒内仅能搜索一次！', { position: 0 })
+            }
         }else{
             setSearchThreadList([])
             setNextSearchPage('')
@@ -141,6 +155,9 @@ const Mangas: React.FC<{navigation}> = ({ navigation }) => {
                 setSearchThreadList([])
                 setNextSearchPage('')
                 setMode('normal')
+                if(scrollViewRef.current){
+                    scrollViewRef.current.scrollTo({x: 0, y: 0, animated: false})
+                }
                 return true
             }
             return false

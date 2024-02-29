@@ -69,4 +69,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default React.memo(MangaCoverImageLazyLoad);
+export default MangaCoverImageLazyLoad;

@@ -20,4 +20,4 @@ const MangaCoverImage: React.FC<{ id: string, author:string, width: number, heig
     }
     return <ImageLoader visible={visible} resizeMode={'contain'} uri={url} width={width} height={height} fade={true}/>
 };
-export default React.memo(MangaCoverImage);
+export default MangaCoverImage;
