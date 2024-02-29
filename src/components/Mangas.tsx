@@ -1,9 +1,7 @@
-import React, {createRef, useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
-    Text,
     View,
     ScrollView,
-    FlatList,
     StyleSheet,
     NativeSyntheticEvent,
     NativeScrollEvent,
@@ -15,9 +13,9 @@ import {Image} from "expo-image";
 import LoadingModal from "./LoadingModal";
 import Toast from "react-native-root-toast";
 import MyText from "./MyText";
-import MangaCoverImage from "./MangaCoverImage";
 import {StatusBar} from "expo-status-bar";
 import Marquee from "./Marquee";
+import {useBackHandler} from '@react-native-community/hooks'
 
 const Mangas: React.FC<{navigation}> = ({ navigation }) => {
     const [threadList, setThreadList] = useState([]);
@@ -115,6 +113,8 @@ const Mangas: React.FC<{navigation}> = ({ navigation }) => {
                 }
             })
         }else{
+            setSearchThreadList([])
+            setNextSearchPage('')
             setMode('normal')
         }
     }
@@ -135,6 +135,15 @@ const Mangas: React.FC<{navigation}> = ({ navigation }) => {
     const isOdd = (number) => {
         return number % 2 !== 0;
     }
+    useBackHandler(() => {
+        if(mode==='search') {
+            setSearchThreadList([])
+            setNextSearchPage('')
+            setMode('normal')
+            return true
+        }
+        return false
+    })
     return (
         <>
             <StatusBar backgroundColor={'#FFEDBC'}/>

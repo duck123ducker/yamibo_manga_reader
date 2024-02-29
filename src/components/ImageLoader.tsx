@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View, useWindowDimensions, ImageResizeMode, Animated} from "react-native";
+import {View, Animated} from "react-native";
 import {getPicByWebView, px2dp} from "../utils";
-import {WebView} from "react-native-webview";
 import {Image, ImageContentFit} from 'expo-image'
 import MyText from "./MyText";
 

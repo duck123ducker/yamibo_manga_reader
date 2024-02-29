@@ -1,6 +1,6 @@
 import React from "react";
 import {WebView} from "react-native-webview";
-import {Button, TouchableOpacity, View} from "react-native";
+import {TouchableOpacity, View} from "react-native";
 import MyText from "../components/MyText";
 import {Image} from "expo-image";
 import {px2dp} from "../utils";

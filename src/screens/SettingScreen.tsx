@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Button, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import React from 'react';
+import {Button, ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
 import {appStore} from "../store/appStore";
 import {clearCache, px2dp, webViewRedirectTo} from "../utils";
 import CookieManager from "@react-native-cookies/cookies";
@@ -7,7 +7,6 @@ import {MMKVStorage} from "../store/MKKVStorage";
 import MyText from "../components/MyText";
 import {Image} from "expo-image";
 import {StatusBar} from "expo-status-bar";
-import * as FileSystem from 'expo-file-system';
 
 const SettingScreen: React.FC = ({navigation}) => {
     const resetCookies = ()=>{

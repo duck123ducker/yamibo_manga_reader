@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View, Image, useWindowDimensions} from "react-native";
-import {getPicByWebView, getThreadsImageListByWebView} from "../utils";
+import {getThreadsImageListByWebView} from "../utils";
 import ImageLoader from "./ImageLoader";
-import MyText from "./MyText";
 
 const MangaCoverImage: React.FC<{ id: string, author:string, width: number, height: number, visible:boolean }> = ({ id, author, width, height, visible }) => {
     const [loaded, setLoaded] = useState(false);

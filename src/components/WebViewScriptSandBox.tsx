@@ -1,6 +1,6 @@
 import React, {createRef, useState} from 'react';
 import {appStore} from "../store/appStore";
-import {WebView, WebViewNavigation} from "react-native-webview";
+import {WebView} from "react-native-webview";
 import {NativeSyntheticEvent} from "react-native";
 import {WebViewMessage} from "react-native-webview/lib/WebViewTypes";
 

@@ -1,5 +1,5 @@
 import React, {MutableRefObject, useEffect, useRef, useState} from "react";
-import {ImageResizeMode, LayoutChangeEvent, View} from "react-native";
+import {LayoutChangeEvent, View} from "react-native";
 import ImageLoader from "./ImageLoader";
 import {ImageContentFit} from "expo-image";
 import {px2dp} from "../utils";

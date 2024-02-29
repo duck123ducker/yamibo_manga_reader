@@ -1,9 +1,7 @@
-import React, {createRef, memo, useEffect, useRef, useState} from 'react';
-import {Button, NativeScrollEvent, NativeSyntheticEvent, ScrollView, Text, View} from "react-native";
-import {getPicByWebView, px2dp} from "../utils";
-import ImageLazyLoad from "../components/ImageLazyLoad";
+import React, {memo, useEffect, useRef, useState} from 'react';
+import {NativeScrollEvent, NativeSyntheticEvent, View} from "react-native";
+import {getPicByWebView} from "../utils";
 import {appStore} from "../store/appStore";
-import ImageLoader from "../components/ImageLoader";
 import {StatusBar} from "expo-status-bar";
 import WebViewReader from "../components/WebViewReader";
 import ProgressStatusBar from "../components/progressStatusBar";

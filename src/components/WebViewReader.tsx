@@ -10,8 +10,8 @@ const WebViewReader: React.FC = ({imageList, paging}) => {
         imageList.forEach((item, index)=>{
             tmp += `
                 <div id="${index}">
-                    <div style="aspect-ratio: 17/24; width: 100vw; font-size: 6vw; display: flex; align-items: center; justify-content: center;">
-                       ${index}
+                    <div style="height: calc(100vw * 24 / 17); width: 100vw; font-size: 6vw; display: flex; align-items: center; justify-content: center;">
+                       ${index+1}
                     </div>
                 </div>
             `
@@ -58,7 +58,9 @@ const WebViewReader: React.FC = ({imageList, paging}) => {
                             divElement.removeChild(divElement.firstChild);
                         }
                         divElement.appendChild(imgElement);
-                        }catch(e){ReactNativeWebView.postMessage(e.toString())}
+                        }catch(e){
+                        // ReactNativeWebView.postMessage(e.toString())
+                        }
                         true;
                     `)
                 }

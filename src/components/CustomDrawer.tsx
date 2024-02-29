@@ -1,6 +1,6 @@
 import React from "react";
 import {DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
-import {StyleSheet, Text, View} from "react-native";
+import {StyleSheet, View} from "react-native";
 import ImageLoader from "./ImageLoader";
 import {useSnapshot} from "valtio";
 import {appStore} from "../store/appStore";

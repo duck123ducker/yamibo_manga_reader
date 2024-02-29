@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
-import {Button, Text, View} from "react-native";
+import {Button, View} from "react-native";
 import {appStore} from "../store/appStore";
 import {useSnapshot} from "valtio/react";
 import {StatusBar} from "expo-status-bar";
-import {getDocByWebView, getMyInfo, getSignedUrl, px2dp} from "../utils";
+import {getDocByWebView, getMyInfo, px2dp} from "../utils";
 import {parse} from "node-html-parser";
 import LoadingModal from "../components/LoadingModal";
 import MainWebView from "../components/MainWebView";

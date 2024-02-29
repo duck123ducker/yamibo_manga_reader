@@ -1,7 +1,6 @@
 import React, {MutableRefObject, useEffect, useRef, useState} from "react";
 import MangaCoverImage from "./MangaCoverImage";
-import {Dimensions, LayoutChangeEvent, StyleSheet, Text, View} from "react-native";
-import MyText from "./MyText";
+import { LayoutChangeEvent, StyleSheet, View} from "react-native";
 
 
 const MangaCoverImageLazyLoad: React.FC<{ mode: string, id: string, author:string, style: any, scrollViewRef: MutableRefObject<any>, scrollViewOffsetY: number, visibleHeight: number, selfVisible: Boolean }> =

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {View, Text, FlatList, TouchableOpacity, StyleSheet} from "react-native";
+import {View, FlatList, TouchableOpacity, StyleSheet} from "react-native";
 import {appStore} from "../store/appStore";
 import {useSnapshot} from "valtio/react";
 import {px2dp} from "../utils";

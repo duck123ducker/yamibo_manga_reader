@@ -2,7 +2,6 @@ import React from "react";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import StackScreens from "./StackScreens";
 import SettingScreen from "../screens/SettingScreen";
-import DownloadManagerScreen from "../screens/DownloadManagerScreen";
 import CustomDrawer from "../components/CustomDrawer";
 import {px2dp} from "../utils";
 import BBSNativeWebviewScreen from "../screens/BBSNativeWebviewScreen";

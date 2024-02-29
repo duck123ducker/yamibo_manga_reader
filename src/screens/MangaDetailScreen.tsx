@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, ScrollView, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View} from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
 import {
     getThreadAuthorComment,
     getThreadsImageListByWebView,

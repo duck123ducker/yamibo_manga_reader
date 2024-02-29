@@ -2,10 +2,18 @@ import {appStore} from "../store/appStore";
 import {Dimensions, Image} from "react-native";
 import { parse } from 'node-html-parser'
 import {subscribe} from "valtio";
-import * as FileSystem from 'expo-file-system';
 import {getFilename} from "expo-asset/build/AssetUris";
 import {MMKVGetJson, MMKVSetJson, MMKVStorage} from "../store/MKKVStorage";
 import Toast from "react-native-root-toast";
+import {
+    deleteAsync,
+    documentDirectory,
+    EncodingType,
+    getInfoAsync,
+    makeDirectoryAsync,
+    readDirectoryAsync,
+    writeAsStringAsync
+} from "expo-file-system";
 
 export function webViewRedirectTo(url: String) {
     appStore.webViewUrl = '';
@@ -230,10 +238,10 @@ export function replaceUrlPathAndQuery(pathWithQuery, newUrl) {
 }
 
 export async function ensureDirExists(dir) {
-    const dirInfo = await FileSystem.getInfoAsync(dir);
+    const dirInfo = await getInfoAsync(dir);
     if (!dirInfo.exists) {
         console.log("directory doesn't exist, creating…");
-        await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+        await makeDirectoryAsync(dir, { intermediates: true });
     }
 }
 export function saveBase64ImageToCache(base64ImageData, fileName) {
@@ -241,11 +249,11 @@ export function saveBase64ImageToCache(base64ImageData, fileName) {
         try {
             const matches = base64ImageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
             const base64Data = matches[2];
-            const cacheDirectory = FileSystem.documentDirectory + 'cache/images/';
+            const cacheDirectory = documentDirectory + 'cache/images/';
             await ensureDirExists(cacheDirectory);
             const cachePath = cacheDirectory + fileName;
-            FileSystem.writeAsStringAsync(cachePath, base64Data, {
-                encoding: FileSystem.EncodingType.Base64,
+            writeAsStringAsync(cachePath, base64Data, {
+                encoding: EncodingType.Base64,
             }).then(() => {
                 console.log('图片已成功写入缓存文件夹:', cachePath);
                 resolve('success');
@@ -260,8 +268,8 @@ export function saveBase64ImageToCache(base64ImageData, fileName) {
 export function getImageInCache(fileName) {
     return new Promise(async (resolve, reject) => {
         try {
-            const fileUri = FileSystem.documentDirectory + 'cache/images/' + fileName;
-            const fileInfo = await FileSystem.getInfoAsync(fileUri, { md5: false });
+            const fileUri = documentDirectory + 'cache/images/' + fileName;
+            const fileInfo = await getInfoAsync(fileUri, { md5: false });
             if (fileInfo.exists) {
                 resolve({exist: true, uri: fileInfo.uri});
             } else {
@@ -308,7 +316,7 @@ export function getNextSearchPage(url){
 }
 
 export function searchThread(keyWords){
-    const url = addQueryParam('/search.php', {mod: 'forum',formhash: appStore.formHash, srchtxt: keyWords, 'srchfid[]': 30, searchsubmit: 'yes'})
+    const url = addQueryParam('/search.php', {mod: 'forum',formhash: appStore.formHash, srchtxt: keyWords, 'srchfid[]': 30, mobile: 'no', searchsubmit: 'yes'})
     return new Promise((resolve, reject) => {
         getDocByWebView(url,'POST').then(res=>{
             resolve(parseSearchResult(res))
@@ -333,7 +341,7 @@ export function initDownloadManga(id, imageList, author, authorName, title, date
 }
 
 export function continueDownloadManga(id, imageList, author, authorName, title, date){
-    const path = FileSystem.documentDirectory + `downloads/${id}/`
+    const path = documentDirectory + `downloads/${id}/`
     ensureDirExists(path).then(()=>{
         const info = MMKVGetJson(`downloadMangas.${id}`)
         appStore.downloadProgress[id] = {
@@ -379,10 +387,10 @@ export function getMyInfo(){
 
 const clearDirectory = async (directoryUri) => {
     try {
-        const fileInfoArray = await FileSystem.readDirectoryAsync(directoryUri);
+        const fileInfoArray = await readDirectoryAsync(directoryUri);
         for (const fileInfo of fileInfoArray) {
             const fileUri = `${directoryUri}/${fileInfo}`;
-            await FileSystem.deleteAsync(fileUri, { idempotent: true });
+            await deleteAsync(fileUri, { idempotent: true });
         }
         console.log('All files in directory cleared successfully.');
     } catch (error) {
@@ -391,6 +399,7 @@ const clearDirectory = async (directoryUri) => {
 };
 
 export async function clearCache(){
-    await clearDirectory(FileSystem.documentDirectory + `cache/`)
-    await clearDirectory(FileSystem.documentDirectory + `downloads/`)
+    await clearDirectory(documentDirectory + `cache/`)
+    await clearDirectory(documentDirectory + `downloads/`)
+    Toast.show('清除成功！', { position: 0 })
 }

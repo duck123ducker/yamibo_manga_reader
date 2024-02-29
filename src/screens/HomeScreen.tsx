@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Text, View} from "react-native";
+import React from 'react';
+import {View} from "react-native";
 import {useSnapshot} from "valtio/react";
 import {appStore} from "../store/appStore";
 import Mangas from "../components/Mangas";

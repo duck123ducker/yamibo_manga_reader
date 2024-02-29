@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, View, ActivityIndicator, StyleSheet, Text } from 'react-native';
+import { Modal, View, ActivityIndicator, StyleSheet } from 'react-native';
 import {px2dp} from "../utils";
 import MyText from "./MyText";
 
