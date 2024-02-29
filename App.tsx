@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import {Button, StyleSheet, Text, View} from 'react-native';
+import { StyleSheet, View} from 'react-native';
 import LoginWebView from "./src/screens/LoginWebView";
 import React from "react";
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
@@ -10,7 +10,6 @@ import {appStore} from "./src/store/appStore";
 import WebViewManager from "./src/components/WebViewManager";
 import { RootSiblingParent } from 'react-native-root-siblings';
 import Splash from "./src/components/Splash";
-// import './src/downloadManager/index'
 
 const App: React.FC = () => {
     const { webViewShow, webViewReady } = useSnapshot(appStore)

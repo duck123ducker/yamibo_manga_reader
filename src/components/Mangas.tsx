@@ -136,13 +136,17 @@ const Mangas: React.FC<{navigation}> = ({ navigation }) => {
         return number % 2 !== 0;
     }
     useBackHandler(() => {
-        if(mode==='search') {
-            setSearchThreadList([])
-            setNextSearchPage('')
-            setMode('normal')
-            return true
+        if(navigation.isFocused()){
+            if(mode==='search') {
+                setSearchThreadList([])
+                setNextSearchPage('')
+                setMode('normal')
+                return true
+            }
+            return false
+        }else{
+            return false
         }
-        return false
     })
     return (
         <>
