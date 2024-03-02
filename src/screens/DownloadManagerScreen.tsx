@@ -53,7 +53,7 @@ const DownloadManagerScreen: React.FC = ({ navigation }) => {
             <FlatList data={downloadProgressList}
                   renderItem={({item, index})=>(
                       <View>
-                          <TouchableOpacity key={index} onPress={()=>{}}>
+                          <TouchableOpacity key={item.id} onPress={()=>{}}>
                               <View style={[styles.manga]}>
                                   <MangaCoverImage id={item.id} author={item.author} width={px2dp(170)} height={px2dp(240)} visible={true}/>
                                   <View style={styles.description}>

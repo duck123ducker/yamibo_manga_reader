@@ -211,7 +211,7 @@ const Mangas: React.FC<{navigation}> = ({ navigation }) => {
                                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>:<></>
                                     }>
                             {(mode === 'normal' ? threadList : (mode === 'search' ? searchThreadList : [])).map((thread, index) => (
-                                <TouchableOpacity key={index} onPress={() => handlePress(thread.id, thread.author, thread.authorName, thread.title, thread.date)}>
+                                <TouchableOpacity key={thread.id} onPress={() => handlePress(thread.id, thread.author, thread.authorName, thread.title, thread.date)}>
                                     <View style={[styles.manga, isOdd(index)?{backgroundColor: '#FFEDBC'}:{}]}>
                                         <MangaCoverImageLazyLoad id={thread.id} author={thread.author} visibleHeight={visibleHeight}
                                                                  scrollViewOffsetY={scrollViewOffsetY} scrollViewRef={scrollViewRef}

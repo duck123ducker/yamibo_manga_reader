@@ -132,9 +132,10 @@ export function getPicByWebView(url: String, method='GET', timeout:number=30000)
 }
 
 export function checkImageListInMKKV(id){
-    const cache = MMKVStorage.getString(`imageList.${id}`)
+    // const cache = MMKVStorage.getString(`imageList.${id}`)
+    const cache = MMKVGetJson(`imageList.${id}`)
     if(!!cache){
-        return {exist: true, data: JSON.parse(cache)}
+        return {exist: true, data: cache}
     }else{
         return {exist: false}
     }
@@ -153,7 +154,8 @@ export function getThreadsImageListByWebView(id: string, author: string){
                 zoomImages.forEach(function(img) {
                     imgList.push(img.getAttribute('file'))
                 });
-                MMKVStorage.set(`imageList.${id}`, JSON.stringify(imgList))
+                // MMKVStorage.set(`imageList.${id}`, JSON.stringify(imgList))
+                MMKVSetJson(`imageList.${id}`, imgList)
                 resolve(imgList)
             })
         }
@@ -401,5 +403,11 @@ const clearDirectory = async (directoryUri) => {
 export async function clearCache(){
     await clearDirectory(documentDirectory + `cache/`)
     await clearDirectory(documentDirectory + `downloads/`)
+    MMKVStorage.getAllKeys().forEach(key=>{
+        if(key.includes('imageList.')){
+            MMKVStorage.delete(key)
+        }
+    })
+    MMKVStorage.delete('imageList')
     Toast.show('清除成功！', { position: 0 })
 }
