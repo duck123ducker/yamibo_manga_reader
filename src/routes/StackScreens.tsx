@@ -9,14 +9,14 @@ import MangaNativeWebviewScreen from "../screens/MangaNativeWebviewScreen";
 const Stack = createStackNavigator();
 
 function StackScreens() {
-    return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="HomeScreen" component={HomeScreen} />
-            <Stack.Screen name="MangaDetail" component={MangaDetailScreen} />
-            <Stack.Screen name="MangaReader" component={MangaReaderScreen} />
-            <Stack.Screen name="MangaNativeWebview" component={MangaNativeWebviewScreen} />
-        </Stack.Navigator>
-    );
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="HomeScreen" component={HomeScreen}/>
+      <Stack.Screen name="MangaDetail" component={MangaDetailScreen}/>
+      <Stack.Screen name="MangaReader" component={MangaReaderScreen}/>
+      <Stack.Screen name="MangaNativeWebview" component={MangaNativeWebviewScreen}/>
+    </Stack.Navigator>
+  );
 }
 
 export default StackScreens;

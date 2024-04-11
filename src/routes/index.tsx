@@ -1,5 +1,5 @@
 import React from "react";
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import {createDrawerNavigator} from '@react-navigation/drawer';
 import StackScreens from "./StackScreens";
 import SettingScreen from "../screens/SettingScreen";
 import CustomDrawer from "../components/CustomDrawer";
@@ -11,24 +11,24 @@ import BBSCheckinNativeWebviewScreen from "../screens/BBSCheckinNativeWebviewScr
 
 const Drawer = createDrawerNavigator();
 const AppNavigation: React.FC = () => {
-    return (
-        <Drawer.Navigator defaultStatus='closed' drawerContent={props => <CustomDrawer {...props}/>}
-                          screenOptions={{
-                              headerShown: false,
-                              drawerStyle: { width: px2dp(400) },
-                              drawerLabelStyle: {margin:0,padding:0},
-                              drawerActiveTintColor: 'black',
-                              drawerActiveBackgroundColor: 'rgb(255,228,155)'
-                          }}
-        >
-            <Drawer.Screen name="主页" component={StackScreens} />
-            <Drawer.Screen name="签到" component={BBSCheckinNativeWebviewScreen}/>
-            <Drawer.Screen name="论坛" component={BBSNativeWebviewScreen}/>
-            <Drawer.Screen name="新站" component={NewSiteNativeWebviewScreen} />
-            <Drawer.Screen name="设置" component={SettingScreen} />
-            {/*<Drawer.Screen name="下载" component={DownloadManagerScreen} />*/}
-        </Drawer.Navigator>
-    );
+  return (
+    <Drawer.Navigator defaultStatus='closed' drawerContent={props => <CustomDrawer {...props}/>}
+                      screenOptions={{
+                        headerShown: false,
+                        drawerStyle: {width: px2dp(400)},
+                        drawerLabelStyle: {margin: 0, padding: 0},
+                        drawerActiveTintColor: 'black',
+                        drawerActiveBackgroundColor: 'rgb(255,228,155)'
+                      }}
+    >
+      <Drawer.Screen name="主页" component={StackScreens}/>
+      <Drawer.Screen name="签到" component={BBSCheckinNativeWebviewScreen}/>
+      <Drawer.Screen name="论坛" component={BBSNativeWebviewScreen}/>
+      <Drawer.Screen name="新站" component={NewSiteNativeWebviewScreen}/>
+      <Drawer.Screen name="设置" component={SettingScreen}/>
+      {/*<Drawer.Screen name="下载" component={DownloadManagerScreen} />*/}
+    </Drawer.Navigator>
+  );
 }
 
 export default AppNavigation;
