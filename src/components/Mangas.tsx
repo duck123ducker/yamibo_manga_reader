@@ -7,7 +7,7 @@ import {
   NativeScrollEvent,
   TouchableOpacity, TextInput, TextInputSubmitEditingEventData, Keyboard, ViewToken, RefreshControl
 } from "react-native";
-import {getNextSearchPage, getTitlesByWebView, px2dp, searchThread, uniqueJsonArray} from "../utils";
+import {checkLogin, getNextSearchPage, getTitlesByWebView, px2dp, searchThread, uniqueJsonArray} from "../utils";
 import MangaCoverImageLazyLoad from "./MangaCoverImageLazyLoad";
 import {Image} from "expo-image";
 import LoadingModal from "./LoadingModal";
@@ -16,6 +16,7 @@ import MyText from "./MyText";
 import {StatusBar} from "expo-status-bar";
 import Marquee from "./Marquee";
 import {useBackHandler} from '@react-native-community/hooks'
+import {appStore} from "../store/appStore";
 
 const Mangas: React.FC<{ navigation }> = ({navigation}) => {
   const [threadList, setThreadList] = useState([]);
@@ -47,15 +48,25 @@ const Mangas: React.FC<{ navigation }> = ({navigation}) => {
     } else if (mode === 'search') {
     }
   }, []);
-  const getThreadsByPage = () => {
+  const getThreadsByPage = async () => {
     setRequesting(true)
-    getTitlesByWebView(`https://bbs.yamibo.com/forum-30-${currentPage}.html?mobile=no`).then(res => {
-      if (currentPage === 1) {
-        res.shift();
+    if (currentPage === 1) {//检测登录状态
+      if (await checkLogin()) {
+        console.log("unlogin")
+        appStore.webViewReady = false//重新登录
+      } else {
+        console.log("checked")
       }
-      setThreadList(uniqueJsonArray([...threadList, ...res]));
-      setRequesting(false)
-    })
+    }
+    if (appStore.webViewReady) {//组件卸载不能立即生效故须判断
+      getTitlesByWebView(`https://bbs.yamibo.com/forum-30-${currentPage}.html?mobile=no`).then(res => {
+        if (currentPage === 1) {
+          res.shift();
+        }
+        setThreadList(uniqueJsonArray([...threadList, ...res]));
+        setRequesting(false)
+      })
+    }
   }
   const handleLayout = (event) => {
     const {height} = event.nativeEvent.layout;

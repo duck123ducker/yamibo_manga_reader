@@ -60,7 +60,7 @@ const WebViewReader: React.FC = ({imageList, paging}) => {
               divElement.appendChild(imgElement);
             }catch(e){
             // ReactNativeWebView.postMessage(e.toString())
-            }'
+            }
             true;
           `)
         }

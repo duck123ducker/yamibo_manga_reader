@@ -138,7 +138,11 @@ export function getPicByWebView(url: String, method = 'GET', timeout: number = 3
 
 export function checkImageListInMKKV(id) {
   // const cache = MMKVStorage.getString(`imageList.${id}`)
-  const cache = MMKVGetJson(`imageList.${id}`)
+  let cache = null
+  try {
+    cache = MMKVGetJson(`imageList.${id}`)
+  } catch (e) {
+  }
   if (!!cache) {
     return {exist: true, data: cache}
   } else {
@@ -425,4 +429,26 @@ export async function clearCache() {
   })
   MMKVStorage.delete('imageList')
   Toast.show('清除成功！', {position: 0})
+}
+
+export async function checkLogin() {
+  return new Promise((resolve, reject) => {
+    getDocByWebView('https://bbs.yamibo.com/member.php?mod=logging&action=login&mobile=2').then(res => {
+      const root = parse(String(res));
+      const loginBtn = root.querySelector('div.btn_login');
+      console.log(res)
+      if (!loginBtn) {
+        MMKVStorage.set('loginStatus', true)
+        appStore.loggingStatus = true;
+        getMyInfo()
+      } else {
+        MMKVStorage.set('loginStatus', false)
+        appStore.loggingStatus = false;
+        appStore.webViewMode = 'login'
+      }
+      resolve(loginBtn)
+    }).catch(error => {
+      reject(error)
+    })
+  })
 }

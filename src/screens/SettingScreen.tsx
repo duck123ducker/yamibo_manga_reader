@@ -13,7 +13,7 @@ const SettingScreen: React.FC = ({navigation}) => {
     CookieManager.clearAll().then(r => {
       MMKVStorage.set('loginStatus', false)
       appStore.webViewUpdateFlag += 1
-      webViewRedirectTo('https://bbs.yamibo.com/home.php?mod=space&do=profile&mycenter=1&mobile=2')
+      webViewRedirectTo('https://bbs.yamibo.com/home.php?mod=space&mobile=no')
       appStore.loggingStatus = false
       appStore.webViewShow = true
       appStore.webViewMode = 'login'
