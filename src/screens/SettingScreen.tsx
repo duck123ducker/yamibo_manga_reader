@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Button, ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
 import {appStore} from "../store/appStore";
 import {clearCache, px2dp, webViewRedirectTo} from "../utils";
@@ -7,6 +7,7 @@ import {MMKVStorage} from "../store/MKKVStorage";
 import MyText from "../components/MyText";
 import {Image} from "expo-image";
 import {StatusBar} from "expo-status-bar";
+import UpdateModal from "../components/UpdateModal";
 
 const SettingScreen: React.FC = ({navigation}) => {
   const resetCookies = () => {
@@ -24,10 +25,12 @@ const SettingScreen: React.FC = ({navigation}) => {
       description: '清除缓存',
       operation: clearCache
     },
-    // {
-    //     description: '清除缓存',
-    //     operation: clearCache
-    // }
+    {
+      description: '更新与支持',
+      operation: () => {
+        navigation.navigate('AboutScreen')
+      }
+    }
   ]
   const isOdd = (number) => {
     return number % 2 !== 0;
@@ -106,7 +109,8 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   oddOption: {
-    backgroundColor: '#ffe6b7'
+    // backgroundColor: '#ffe8c8'
+    backgroundColor: '#f8f8e0'
   },
   lastOption: {
     borderBottomRightRadius: px2dp(10),

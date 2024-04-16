@@ -31,5 +31,12 @@ export const appStore = proxy({
       }
     })()
   },
-  readingPage: 1
+  readingPage: 1,
+  updateProps: {message: {info: "", url: "", version: ""}, title: "", visible: false},
+  closeUpdateModal: () => {
+    appStore.updateProps = {message: {info: "", url: "", version: ""}, title: "", visible: false}
+  },
+  showUpdateModal: (message, title) => {
+    appStore.updateProps = {message: message, title: title, visible: true}
+  }
 })

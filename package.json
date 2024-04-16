@@ -35,7 +35,8 @@
     "react-native-web": "~0.19.6",
     "react-native-webview": "13.6.4",
     "typescript": "^5.3.0",
-    "valtio": "^1.13.1"
+    "valtio": "^1.13.1",
+    "expo-application": "~5.8.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

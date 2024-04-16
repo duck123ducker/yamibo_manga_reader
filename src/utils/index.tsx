@@ -5,6 +5,7 @@ import {subscribe} from "valtio";
 import {getFilename} from "expo-asset/build/AssetUris";
 import {MMKVGetJson, MMKVSetJson, MMKVStorage} from "../store/MKKVStorage";
 import Toast from "react-native-root-toast";
+import * as Application from 'expo-application';
 import {
   deleteAsync,
   documentDirectory,
@@ -436,7 +437,6 @@ export async function checkLogin() {
     getDocByWebView('https://bbs.yamibo.com/member.php?mod=logging&action=login&mobile=2').then(res => {
       const root = parse(String(res));
       const loginBtn = root.querySelector('div.btn_login');
-      console.log(res)
       if (!loginBtn) {
         MMKVStorage.set('loginStatus', true)
         appStore.loggingStatus = true;
@@ -449,6 +449,24 @@ export async function checkLogin() {
       resolve(loginBtn)
     }).catch(error => {
       reject(error)
+    })
+  })
+}
+
+export async function checkUpdate() {
+  return new Promise<any>((resolve, reject) => {
+    fetch('https://api.github.com/repos/duck123ducker/yamibo_manga_reader/releases/latest').then(response => {
+      if (!response.ok) {
+        reject('网络请求错误')
+      }
+      return response.json();
+    })
+    .then(data => {
+      if(Application.nativeApplicationVersion === data.tag_name.slice(1)){
+        resolve({hasUpdate: true, data: {version: data.tag_name, info: data.body, url: data.html_url}})
+      }else {
+        resolve({hasUpdate: false})
+      }
     })
   })
 }

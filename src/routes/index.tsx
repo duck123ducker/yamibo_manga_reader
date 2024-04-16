@@ -1,12 +1,12 @@
 import React from "react";
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import StackScreens from "./StackScreens";
-import SettingScreen from "../screens/SettingScreen";
 import CustomDrawer from "../components/CustomDrawer";
 import {px2dp} from "../utils";
 import BBSNativeWebviewScreen from "../screens/BBSNativeWebviewScreen";
 import NewSiteNativeWebviewScreen from "../screens/NewSiteNativeWebviewScreen";
 import BBSCheckinNativeWebviewScreen from "../screens/BBSCheckinNativeWebviewScreen";
+import SettingScreens from "./SettingScreens";
 
 
 const Drawer = createDrawerNavigator();
@@ -25,7 +25,7 @@ const AppNavigation: React.FC = () => {
       <Drawer.Screen name="签到" component={BBSCheckinNativeWebviewScreen}/>
       <Drawer.Screen name="论坛" component={BBSNativeWebviewScreen}/>
       <Drawer.Screen name="新站" component={NewSiteNativeWebviewScreen}/>
-      <Drawer.Screen name="设置" component={SettingScreen}/>
+      <Drawer.Screen name="设置" component={SettingScreens}/>
       {/*<Drawer.Screen name="下载" component={DownloadManagerScreen} />*/}
     </Drawer.Navigator>
   );
