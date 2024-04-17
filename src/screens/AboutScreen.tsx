@@ -18,7 +18,7 @@ const AboutScreen: React.FC = ({navigation}) => {
       checkUpdate()
       .then(res => {
         setChecking(false)
-        Toast.show('检查更新成功！', {position: 0})
+        Toast.show('已是最新版本！', {position: 0})
         if(res.hasUpdate){
           appStore.showUpdateModal(res.data, `${res.data.version}更新`)
         }
