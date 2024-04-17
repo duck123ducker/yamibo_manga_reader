@@ -57,7 +57,7 @@ const SettingScreen: React.FC = ({navigation}) => {
         <View style={styles.optionsContainer}>
           {
             settingOptions.map((option, index) => (
-              <View key={index}>
+              <View key={option.description}>
                 <TouchableOpacity
                   style={[styles.option, isOdd(index) ? styles.oddOption : {}, index + 1 === settingOptions.length ? styles.lastOption : {}]}
                   onPress={option.operation}>

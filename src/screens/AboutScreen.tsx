@@ -84,8 +84,8 @@ const AboutScreen: React.FC = ({navigation}) => {
         <StatusBar backgroundColor={'#ffe6b7'}/>
       </View>
       {
-        aboutOptions.map((option, index) => (
-          <View key={index}>
+        aboutOptions.map(option => (
+          <View key={option.description}>
             <TouchableOpacity
               style={[styles.option]}
               onPress={() => {

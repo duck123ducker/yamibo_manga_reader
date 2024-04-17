@@ -46,8 +46,8 @@ const UpdateModal: React.FC<UpdateModalProps> = ({visible, title, message, close
           </View>
           <View style={styles.buttons}>
             {
-              buttons.map((item, index) => (
-                <TouchableOpacity key={index} onPress={item.operation}>
+              buttons.map(item => (
+                <TouchableOpacity key={item.description} onPress={item.operation}>
                   <MyText style={styles.btn}>{item.description}</MyText>
                 </TouchableOpacity>
               ))

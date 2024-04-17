@@ -7,7 +7,7 @@ import {webViewRedirectTo} from "../utils";
 import MyText from "../components/MyText";
 import {MMKVStorage} from "../store/MKKVStorage";
 
-const HomeScreen: React.FC = ({navigation}) => {
+const HomeScreen: React.FC<{ route, navigation }> = ({route, navigation}) => {
   const {loggingStatus} = useSnapshot(appStore)
   if (!MMKVStorage.getBoolean('loginStatus')) {
     appStore.webViewMode = 'login'
@@ -20,7 +20,7 @@ const HomeScreen: React.FC = ({navigation}) => {
   return (
     <View style={{flex: 1}}>
       {loggingStatus ?
-        <Mangas navigation={navigation}/> :
+        <Mangas route={route} navigation={navigation}/> :
         <MyText>未登录</MyText>
       }
     </View>

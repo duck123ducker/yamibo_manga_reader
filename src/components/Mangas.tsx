@@ -18,7 +18,8 @@ import Marquee from "./Marquee";
 import {useBackHandler} from '@react-native-community/hooks'
 import {appStore} from "../store/appStore";
 
-const Mangas: React.FC<{ navigation }> = ({navigation}) => {
+const Mangas: React.FC<{ route, navigation }> = ({route, navigation}) => {
+  const {routeMode, keyWord} = route.params
   const [threadList, setThreadList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [scrollViewOffsetY, setScrollViewOffsetY] = useState<number>(0);
@@ -26,7 +27,7 @@ const Mangas: React.FC<{ navigation }> = ({navigation}) => {
   const [visibleHeight, setVisibleHeight] = useState(0);
   const [requesting, setRequesting] = useState(false)
   const [searchValue, setSearchValue] = useState('')
-  const [loading, setLoading] = useState(false)
+  // const [loading, setLoading] = useState(false)
   const textInputRef = useRef<TextInput>();
   const [mode, setMode] = useState('normal') //'search'
   const [nextSearchPage, setNextSearchPage] = useState('')
@@ -99,13 +100,20 @@ const Mangas: React.FC<{ navigation }> = ({navigation}) => {
     }
   }
   const handlePress = (id: string, author: string, authorName: string, title: string, date: string) => {
-    navigation.navigate('MangaDetail', {id: id, author: author, authorName: authorName, title: title, date: date})
+    navigation.push('MangaDetail', {id: id, author: author, authorName: authorName, title: title, date: date})
   }
   useEffect(() => {
-    if (!refreshing) {
-      getThreadsByPage()
+    if (routeMode === 'normal') {
+      if (!refreshing) {
+        getThreadsByPage()
+      }
     }
   }, [currentPage])
+  useEffect(() => {
+    if (routeMode === 'search') {
+      search(keyWord)
+    }
+  }, [])
   const onChangeText = (e) => {
     setSearchValue(e)
   }
@@ -121,11 +129,11 @@ const Mangas: React.FC<{ navigation }> = ({navigation}) => {
         setSearchThreadList([])
         setNextSearchPage('')
         setMode('search')
-        setLoading(true)
+        // setLoading(true)
         searchThread(value.trim()).then(res => {
           setSearchThreadList(res.threadList)
           setNextSearchPage(res.nextPageUrl)
-          setLoading(false)
+          // setLoading(false)
           setSearchThrottle(true)
           setTimeout(() => {
             setSearchThrottle(false)
@@ -162,7 +170,7 @@ const Mangas: React.FC<{ navigation }> = ({navigation}) => {
   }
   useBackHandler(() => {
     if (navigation.isFocused()) {
-      if (mode === 'search') {
+      if (mode === 'search' && routeMode === 'normal') {
         setSearchThreadList([])
         setNextSearchPage('')
         setMode('normal')
@@ -180,13 +188,14 @@ const Mangas: React.FC<{ navigation }> = ({navigation}) => {
     <>
       <StatusBar backgroundColor={'#FFEDBC'}/>
       <View style={{backgroundColor: '#f8f8e0', flex: 1, position: 'relative'}}>
-        <LoadingModal visible={loading} message={'搜索中...'}/>
+        {/*<LoadingModal visible={loading} message={'搜索中...'}/>*/}
         <View style={{
           backgroundColor: '#FFEDBC',
           height: px2dp(100),
           alignItems: 'center',
           flexDirection: 'row',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          display: routeMode === 'normal' ? 'flex' : 'none'
         }}>
           <View style={{
             borderWidth: px2dp(1),
@@ -239,7 +248,7 @@ const Mangas: React.FC<{ navigation }> = ({navigation}) => {
         {/*          style={{flex: 1}} key={mode} ref={scrollViewRef} onEndReachedThreshold={px2dp(50)}*/}
         {/*          onEndReached={onEndReached}*/}
         {/*/>*/}
-        {threadList.length === 0 ?
+        {(mode === 'normal' ? threadList.length === 0 : searchThreadList.length === 0) ?
           <Marquee width={px2dp(750)} height={px2dp(5)} color1="#ff5d5d" color2="#8bacff" speed={2000}/> :
           <>
             <ScrollView style={{flex: 1}} key={mode} ref={scrollViewRef} onLayout={handleLayout} onScroll={handleScroll}
