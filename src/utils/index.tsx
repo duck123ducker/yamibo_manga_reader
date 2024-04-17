@@ -462,7 +462,7 @@ export async function checkUpdate() {
       return response.json();
     })
     .then(data => {
-      if(Application.nativeApplicationVersion === data.tag_name.slice(1)){
+      if(Application.nativeApplicationVersion !== data.tag_name.slice(1)){
         resolve({hasUpdate: true, data: {version: data.tag_name, info: data.body, url: data.html_url}})
       }else {
         resolve({hasUpdate: false})
