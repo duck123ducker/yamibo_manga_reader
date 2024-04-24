@@ -215,6 +215,7 @@ export function getSignedUrl(script: string, hash, url, timeout) {
       appStore.webViewRequest[hash] = {
         type: 'doc',
         url: replaceUrlPathAndQuery(path, url),
+        method: 'GET',
         timeout: timeout
       }
     }
