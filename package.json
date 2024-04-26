@@ -16,6 +16,7 @@
     "@react-navigation/stack": "^6.3.21",
     "@types/react": "~18.2.45",
     "expo": "~50.0.7",
+    "expo-application": "~5.8.3",
     "expo-asset": "~9.0.2",
     "expo-battery": "~7.7.2",
     "expo-dev-client": "~3.3.8",
@@ -34,9 +35,9 @@
     "react-native-screens": "~3.29.0",
     "react-native-web": "~0.19.6",
     "react-native-webview": "13.6.4",
+    "text-encoding": "^0.7.0",
     "typescript": "^5.3.0",
-    "valtio": "^1.13.1",
-    "expo-application": "~5.8.3"
+    "valtio": "^1.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

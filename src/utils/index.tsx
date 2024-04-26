@@ -1,6 +1,7 @@
 import {appStore} from "../store/appStore";
 import {Dimensions, Image} from "react-native";
-import {parse} from 'node-html-parser'
+import {parse, HTMLElement} from 'node-html-parser';
+import {TextDecoder} from 'text-encoding';
 import {subscribe} from "valtio";
 import {getFilename} from "expo-asset/build/AssetUris";
 import {MMKVGetJson, MMKVSetJson, MMKVStorage} from "../store/MKKVStorage";
@@ -62,6 +63,7 @@ export function getTitlesByWebView(url: String) {
     getDocByWebView(url).then(res => {
       const threadTitles = []
       const root = parse(String(res));
+      replaceDecryptEmail(root)
       const tbodyElements = root.querySelectorAll('tbody[id*=normalthread_]');
       tbodyElements.forEach(tbody => {
         const aElement = tbody.querySelectorAll('tr')[0].querySelectorAll('th')[0].querySelectorAll('a')[2]
@@ -378,11 +380,58 @@ export function continueDownloadManga(id, imageList, author, authorName, title, 
   })
 }
 
+function decodeEmail(encodedString) {
+  let result = "";
+  let key = parseInt(encodedString.substr(0, 2), 16);
+  let encodedChars = encodedString.slice(2).match(/.{1,2}/g);
+  for (let i = 0; i < encodedChars.length;) {
+    let hex = encodedChars[i];
+    let charCode = parseInt(hex, 16) ^ key;
+    if (charCode >= 0x80) {
+      let bytesCount;
+      if (charCode >= 0xF0) bytesCount = 4;
+      else if (charCode >= 0xE0) bytesCount = 3;
+      else bytesCount = 2;
+      let multibyte = [charCode];
+      for (let j = 1; j < bytesCount; j++) {
+        i++;
+        multibyte.push(parseInt(encodedChars[i], 16) ^ key);
+      }
+      let charBytes = new Uint8Array(multibyte);
+      let decoder = new TextDecoder();
+      result += decoder.decode(charBytes);
+    } else {
+      result += String.fromCharCode(charCode);
+    }
+    i++;
+  }
+  return result;
+}
+
+function replaceDecryptEmail(element){
+  let elements = element.querySelectorAll('a.__yjs_email__');
+  for (let i = 0; i < elements.length; i++) {
+    let encryptedEmail = elements[i].attributes['data-yjsemail'];
+    let decryptedEmail = decodeEmail(encryptedEmail);
+    let span = new HTMLElement('span', {}, '', null);
+    span.text = decryptedEmail;
+    let parent = elements[i].parentNode;
+    if (parent) {
+      let html = parent.innerHTML;
+      let oldElementHtml = elements[i].outerHTML;
+      let newElementHtml = span.outerHTML;
+      let replacedHtml = html.replace(oldElementHtml, newElementHtml);
+      parent.set_content(replacedHtml, { decodeEntities: true });
+    }
+  }
+}
+
 export function getThreadAuthorComment(id) {
   return new Promise((resolve, reject) => {
     getDocByWebView(`https://bbs.yamibo.com/forum.php?mod=viewthread&tid=${id}&mobile=2`).then(res => {
       const root = parse(String(res));
-      resolve(root.querySelector('div[id*=pid]').querySelector('div.message').innerText.trim())
+      replaceDecryptEmail(root)
+      resolve(root.querySelector('div[id*=pid]').querySelector('div.message').innerText.trim());
     })
   })
 }
@@ -463,9 +512,9 @@ export async function checkUpdate() {
       return response.json();
     })
     .then(data => {
-      if(Application.nativeApplicationVersion !== data.tag_name.slice(1)){
+      if (Application.nativeApplicationVersion !== data.tag_name.slice(1)) {
         resolve({hasUpdate: true, data: {version: data.tag_name, info: data.body, url: data.html_url}})
-      }else {
+      } else {
         resolve({hasUpdate: false})
       }
     })
