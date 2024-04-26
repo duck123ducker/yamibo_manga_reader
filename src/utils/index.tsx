@@ -146,7 +146,7 @@ export function checkImageListInMKKV(id) {
     cache = MMKVGetJson(`imageList.${id}`)
   } catch (e) {
   }
-  if (!!cache) {
+  if (!!cache && cache.length !== 0) {
     return {exist: true, data: cache}
   } else {
     return {exist: false}
@@ -408,7 +408,7 @@ function decodeEmail(encodedString) {
   return result;
 }
 
-function replaceDecryptEmail(element){
+function replaceDecryptEmail(element) {
   let elements = element.querySelectorAll('a.__yjs_email__');
   for (let i = 0; i < elements.length; i++) {
     let encryptedEmail = elements[i].attributes['data-yjsemail'];
@@ -421,7 +421,7 @@ function replaceDecryptEmail(element){
       let oldElementHtml = elements[i].outerHTML;
       let newElementHtml = span.outerHTML;
       let replacedHtml = html.replace(oldElementHtml, newElementHtml);
-      parent.set_content(replacedHtml, { decodeEntities: true });
+      parent.set_content(replacedHtml, {decodeEntities: true});
     }
   }
 }
