@@ -26,7 +26,13 @@ const MainWebView: React.FC = () => {
               var timeout = ${tmp[hash].timeout};
               var xhr = new XMLHttpRequest();
               xhr.open('${tmp[hash].method}', url, true);
-              xhr.setRequestHeader('Cache-Control', 'max-age=3600');
+              ${(() => {
+                if(tmp[hash].type === 'pic'){
+                  return 'xhr.setRequestHeader(\'Cache-Control\', \'max-age=3600\');'
+                }else {
+                  return ''
+                }
+              })()}
               xhr.timeout = timeout;
               xhr.responseType = 'blob';
               xhr.onload = function () {
@@ -75,14 +81,14 @@ const MainWebView: React.FC = () => {
                         default: {
                           return `
                             ReactNativeWebView.postMessage(JSON.stringify({
-                                'msgType': '${tmp[hash].type}',
-                                'msg': {
-                                    'hash': '${hash}',
-                                    'url': '${tmp[hash].url}',
-                                    'timeout': ${tmp[hash].timeout},
-                                    'code': 200,
-                                    'result': result
-                                }
+                              'msgType': '${tmp[hash].type}',
+                              'msg': {
+                                'hash': '${hash}',
+                                'url': '${tmp[hash].url}',
+                                'timeout': ${tmp[hash].timeout},
+                                'code': 200,
+                                'result': result
+                              }
                             }));
                           `
                         }
@@ -114,32 +120,32 @@ const MainWebView: React.FC = () => {
                     }
                   }));
                 }
-            };
-            xhr.ontimeout = function () {
-              ReactNativeWebView.postMessage(JSON.stringify({
-                'msgType': '${tmp[hash].type}',
-                'msg': {
-                  'hash': '${hash}',
-                  'url': '${tmp[hash].url}',
-                  'timeout': ${tmp[hash].timeout},
-                  'code': 600, //timeout
-                  'result': 'timeoutError'
-                }
-              }));
-            };
-            xhr.onerror = function () {
-              ReactNativeWebView.postMessage(JSON.stringify({
-                'msgType': '${tmp[hash].type}',
-                'msg': {
-                  'hash': '${hash}',
-                  'url': '${tmp[hash].url}',
-                  'timeout': ${tmp[hash].timeout},
-                  'code': 601, //unknown
-                  'result': 'unknownError'
-                }
-              }));
-            };
-            xhr.send();
+              };
+              xhr.ontimeout = function () {
+                ReactNativeWebView.postMessage(JSON.stringify({
+                  'msgType': '${tmp[hash].type}',
+                  'msg': {
+                    'hash': '${hash}',
+                    'url': '${tmp[hash].url}',
+                    'timeout': ${tmp[hash].timeout},
+                    'code': 600, //timeout
+                    'result': 'timeoutError'
+                  }
+                }));
+              };
+              xhr.onerror = function () {
+                ReactNativeWebView.postMessage(JSON.stringify({
+                  'msgType': '${tmp[hash].type}',
+                  'msg': {
+                    'hash': '${hash}',
+                    'url': '${tmp[hash].url}',
+                    'timeout': ${tmp[hash].timeout},
+                    'code': 601, //unknown
+                    'result': 'unknownError'
+                  }
+                }));
+              };
+              xhr.send();
             }
             getRes${hash}();
             true;

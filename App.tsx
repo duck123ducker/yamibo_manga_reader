@@ -12,7 +12,6 @@ import {RootSiblingParent} from 'react-native-root-siblings';
 import Splash from "./src/components/Splash";
 import UpdateModal from "./src/components/UpdateModal";
 import {checkUpdate} from "./src/utils";
-import Toast from "react-native-root-toast";
 
 const App: React.FC = () => {
   const {webViewShow, webViewReady, updateProps} = useSnapshot(appStore)
