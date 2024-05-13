@@ -17,6 +17,9 @@ import {
   writeAsStringAsync
 } from "expo-file-system";
 
+
+const fileReader = new FileReader();
+
 export function webViewRedirectTo(url: String) {
   appStore.webViewUrl = '';
   setImmediate(() => {
@@ -29,33 +32,38 @@ export function getHash() {
 }
 
 export function getDocByWebView(url: String, method = 'GET', timeout: number = 30000) {
-  const hash = getHash()
-  appStore.webViewRequest[hash] = {
-    type: 'doc',
-    method: method,
-    url: url,
-    timeout: timeout
-  }
   return new Promise((resolve, reject) => {
-    let timer
-    const unsubscribe = subscribe(appStore.webViewResult, () => {
-      if (appStore.webViewResult.hasOwnProperty(hash)) {
-        clearTimeout(timer);
-        unsubscribe();
-        if (appStore.webViewResult[hash].code === 200) {
-          resolve(appStore.webViewResult[hash].result);
-        } else {
-          reject(appStore.webViewResult[hash].result)
-          errorHandler(appStore.webViewResult[hash].code)
-        }
-        delete appStore.webViewResult[hash]
+    if (appStore.urlRequestCache.hasOwnProperty(url)) {
+      resolve(appStore.urlRequestCache[url])
+    } else {
+      const hash = getHash()
+      appStore.webViewRequest[hash] = {
+        type: 'doc',
+        method: method,
+        url: url,
+        timeout: timeout
       }
-    });
-    timer = setTimeout(() => {
-      unsubscribe();
-      reject('timer timeout');
-    }, timeout + 3000);
-  });
+      let timer
+      const unsubscribe = subscribe(appStore.webViewResult, () => {
+        if (appStore.webViewResult.hasOwnProperty(hash)) {
+          clearTimeout(timer);
+          unsubscribe();
+          if (appStore.webViewResult[hash].code === 200) {
+            appStore.urlRequestCache[url] = appStore.webViewResult[hash].result;
+            resolve(appStore.webViewResult[hash].result);
+          } else {
+            reject(appStore.webViewResult[hash].result)
+            errorHandler(appStore.webViewResult[hash].code)
+          }
+          delete appStore.webViewResult[hash]
+        }
+      });
+      timer = setTimeout(() => {
+        unsubscribe();
+        reject('timer timeout');
+      }, timeout + 3000);
+    }
+  })
 }
 
 export function getTitlesByWebView(url: String) {
@@ -106,36 +114,63 @@ export function getPicByWebView(url: String, method = 'GET', timeout: number = 3
   })
 
   function getPic() {
-    const hash = getHash()
-    appStore.webViewRequest[hash] = {
-      type: 'pic',
-      url: url,
-      method: method,
-      timeout: timeout
-    }
-    return new Promise((resolve, reject) => {
-      let timer
-      const unsubscribe = subscribe(appStore.webViewResult, () => {
-        if (appStore.webViewResult.hasOwnProperty(hash)) {
-          clearTimeout(timer);
-          unsubscribe();
-          if (appStore.webViewResult[hash].code === 200) {
-            // resolve(appStore.webViewResult[hash]);
-            saveBase64ImageToCache(appStore.webViewResult[hash].result, url2FileName(url)).then(() => {
-              getPicByWebView(url, method, timeout).then(res => resolve(res))
-            }).catch(err => resolve(appStore.webViewResult[hash]))
-          } else {
-            reject(appStore.webViewResult[hash].result);
-            errorHandler(appStore.webViewResult[hash].code)
+    if (!url.startsWith('http') || url.includes('bbs.yamibo.com')) {
+      const hash = getHash()
+      appStore.webViewRequest[hash] = {
+        type: 'pic',
+        url: url,
+        method: method,
+        timeout: timeout
+      }
+      return new Promise((resolve, reject) => {
+        let timer
+        const unsubscribe = subscribe(appStore.webViewResult, () => {
+          if (appStore.webViewResult.hasOwnProperty(hash)) {
+            clearTimeout(timer);
+            unsubscribe();
+            if (appStore.webViewResult[hash].code === 200) {
+              // resolve(appStore.webViewResult[hash]);
+              saveImageToCache(appStore.webViewResult[hash].result, url2FileName(url), 'b64').then(() => {
+                getPicByWebView(url, method, timeout).then(res => resolve(res))
+              }).catch(err => resolve(appStore.webViewResult[hash]))
+            } else {
+              reject(appStore.webViewResult[hash].result);
+              errorHandler(appStore.webViewResult[hash].code)
+            }
+            delete appStore.webViewResult[hash]
           }
-          delete appStore.webViewResult[hash]
-        }
+        });
+        timer = setTimeout(() => {
+          unsubscribe();
+          reject('timer timeout');
+        }, timeout + 3000);
       });
-      timer = setTimeout(() => {
-        unsubscribe();
-        reject('timer timeout');
-      }, timeout + 3000);
-    });
+    } else {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await fetch(url);
+          const imageBlob = await response.blob()
+          fileReader.onload = () => {
+            const base64Data = fileReader.result;
+            saveImageToCache(base64Data, url2FileName(url), 'blob').then(() => {
+              getPicByWebView(url, method, timeout).then(res => resolve(res))
+            })
+          };
+          fileReader.onerror = (e) => {
+            throw new Error(e.type)
+          }
+          fileReader.readAsDataURL(imageBlob);
+        } catch (e) {
+          reject({
+            hash: getHash(),
+            url: url,
+            timeout: 0,
+            code: 602, //Pic host error
+            result: String(e)
+          })
+        }
+      })
+    }
   }
 }
 
@@ -162,7 +197,10 @@ export function getThreadsImageListByWebView(id: string, author: string) {
       getDocByWebView(`https://bbs.yamibo.com/thread-${id}-1-1.html?mobile=no&authorid=${author}`).then(res => {
         const imgList = []
         const root = parse(String(res));
-        const zoomImages = root.querySelectorAll('img.zoom[file*="data/attachment"]');
+        let zoomImages = root.querySelectorAll('img.zoom[file*="data/attachment"]');
+        if (zoomImages.length === 0) {
+          zoomImages = root.querySelectorAll('img.zoom')
+        }
         zoomImages.forEach(function (img) {
           imgList.push(img.getAttribute('file'))
         });
@@ -261,11 +299,16 @@ export async function ensureDirExists(dir) {
   }
 }
 
-export function saveBase64ImageToCache(base64ImageData, fileName) {
+export function saveImageToCache(data, fileName, type) {
   return new Promise(async (resolve, reject) => {
     try {
-      const matches = base64ImageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-      const base64Data = matches[2];
+      let base64Data = '';
+      if (type === 'b64') {
+        const matches = data.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        base64Data = matches[2];
+      } else if (type === 'blob') {
+        base64Data = data.split(',')[1];
+      }
       const cacheDirectory = documentDirectory + 'cache/images/';
       await ensureDirExists(cacheDirectory);
       const cachePath = cacheDirectory + fileName;
@@ -299,7 +342,17 @@ export function getImageInCache(fileName) {
 }
 
 export function url2FileName(url) {
-  return url.split('/').pop()
+  // return url.split('/').pop()
+  const lastDotIndex = url.lastIndexOf('.');
+  if (lastDotIndex === -1) {
+    return url.replace(/[\/\:\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\% \<\>\"\\\{\}\|\^\`]/g, '_');
+  } else {
+    let firstPart = url.substring(0, lastDotIndex);
+    let secondPart = url.substring(lastDotIndex);
+    firstPart = firstPart.replace(/[\/\:\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\% \<\>\"\\\{\}\|\^\`\.]/g, '_');
+    secondPart = secondPart.replace(/[\/\:\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=\% \<\>\"\\\{\}\|\^\`]/g, '_');
+    return firstPart + secondPart;
+  }
 }
 
 export function parseSearchResult(res) {
