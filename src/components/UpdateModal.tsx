@@ -1,8 +1,9 @@
 import React from 'react';
-import {Modal, View, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {px2dp} from "../utils";
 import MyText from "./MyText";
 import * as Linking from "expo-linking";
+import MyModal from "./MyModal";
 
 interface UpdateModalProps {
   visible: boolean;
@@ -25,52 +26,21 @@ const UpdateModal: React.FC<UpdateModalProps> = ({visible, title, message, close
     }
   ]
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={() => {
-      }}
-    >
-      <View style={styles.mask}>
-        <View style={styles.container}>
-          <View style={styles.title}>
-            <MyText style={styles.titleText}>
-              {title}
-            </MyText>
-          </View>
-          <View style={styles.msg}>
-            <MyText style={styles.msgText}>
-              {message.info}
-            </MyText>
-          </View>
-          <View style={styles.buttons}>
-            {
-              buttons.map(item => (
-                <TouchableOpacity key={item.description} onPress={item.operation}>
-                  <MyText style={styles.btn}>{item.description}</MyText>
-                </TouchableOpacity>
-              ))
-            }
-          </View>
-        </View>
+    <MyModal buttons={buttons} visible={visible}><View style={styles.title}>
+      <MyText style={styles.titleText}>
+        {title}
+      </MyText>
+    </View>
+      <View style={styles.msg}>
+        <MyText style={styles.msgText}>
+          {message.info}
+        </MyText>
       </View>
-    </Modal>
+    </MyModal>
   );
 }
 
 const styles = StyleSheet.create({
-  mask: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  container: {
-    backgroundColor: '#f8f8e0',
-    width: px2dp(600),
-    padding: px2dp(20)
-  },
   title: {
     justifyContent: "center",
     alignItems: 'center',
@@ -83,14 +53,7 @@ const styles = StyleSheet.create({
   msg: {
     marginBottom: px2dp(20)
   },
-  msgText: {},
-  buttons: {
-    flexDirection: "row",
-    justifyContent: "space-between"
-  },
-  btn: {
-    fontWeight: "bold"
-  }
+  msgText: {}
 });
 
 export default UpdateModal;

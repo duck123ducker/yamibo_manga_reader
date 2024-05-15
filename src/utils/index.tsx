@@ -31,9 +31,9 @@ export function getHash() {
   return Math.random().toString(36).slice(2)
 }
 
-export function getDocByWebView(url: String, method = 'GET', timeout: number = 30000) {
+export function getDocByWebView(url: String, method = 'GET', timeout: number = 30000, payload = null) {
   return new Promise((resolve, reject) => {
-    if (appStore.urlRequestCache.hasOwnProperty(url)) {
+    if (appStore.urlRequestCache.hasOwnProperty(url) && !url.includes('action=rate')) {
       resolve(appStore.urlRequestCache[url])
     } else {
       const hash = getHash()
@@ -41,7 +41,8 @@ export function getDocByWebView(url: String, method = 'GET', timeout: number = 3
         type: 'doc',
         method: method,
         url: url,
-        timeout: timeout
+        timeout: timeout,
+        payload: payload
       }
       let timer
       const unsubscribe = subscribe(appStore.webViewResult, () => {
@@ -402,6 +403,47 @@ export function searchThread(keyWords) {
   })
 }
 
+export function rateThreadPost(tid, pid, score, reason) {
+  const url = addQueryParam('/forum.php', {
+    mod: 'misc',
+    action: 'rate',
+    ratesubmit: 'yes',
+    infloat: 'yes',
+    inajax: '1'
+  })
+  const payload = new URLSearchParams({
+    formhash: appStore.formHash,
+    tid: tid,
+    pid: pid,
+    referer: `https://bbs.yamibo.com/forum.php?mod=viewthread&tid=${tid}#pid${pid}`,
+    handlekey: "rate",
+    score1: score,
+    reason: reason
+  });
+  return new Promise((resolve, reject) => {
+    getDocByWebView(url, 'POST', 30000, payload.toString()).then(res => {
+      if(res.includes('感谢您的参与')) resolve('success')
+      else reject('error')
+    }).catch(e => {
+      reject(e)
+    })
+  })
+}
+
+export function rateThread(tid, score, reason) {
+  return new Promise((resolve, reject) => {
+    getDocByWebView(`https://bbs.yamibo.com/forum.php?mod=viewthread&tid=${tid}&mobile=2`).then(res => {
+      const root = parse(String(res));
+      const pid = root.querySelector('div[id*=pid]').getAttribute('id').slice(3).trim()
+      rateThreadPost(tid, pid, score, reason).then(res => {
+        resolve(res)
+      }).catch(e => {
+        reject(e)
+      })
+    })
+  })
+}
+
 export function initDownloadManga(id, imageList, author, authorName, title, date) {
   MMKVSetJson(`downloadMangas.${id}`, {
     id: id,
@@ -485,6 +527,30 @@ export function getThreadAuthorComment(id) {
       const root = parse(String(res));
       replaceDecryptEmail(root)
       resolve(root.querySelector('div[id*=pid]').querySelector('div.message').innerText.trim());
+    })
+  })
+}
+
+export function getThreadRateInfo(id) {
+  return new Promise((resolve, reject) => {
+    getDocByWebView(`https://bbs.yamibo.com/forum.php?mod=viewthread&tid=${id}&mobile=2`).then(res => {
+      const root = parse(String(res));
+      const pid = root.querySelector('div[id*=pid]').getAttribute('id').slice(3).trim()
+      getDocByWebView(`https://bbs.yamibo.com/forum.php?mod=misc&action=rate&tid=${id}&pid=${pid}&mobile=2&inajax=1`).then(res => {
+        if (String(res).includes('抱歉，您不能对同一个帖子重复评分')) {
+          resolve({
+            rated: true
+          })
+        } else {
+          resolve({
+            rated: false
+          })
+        }
+      }).catch(e => {
+        reject(e)
+      })
+    }).catch(e => {
+      reject(e)
     })
   })
 }

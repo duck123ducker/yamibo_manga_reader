@@ -2,7 +2,7 @@
   "expo": {
     "name": "300阅读器",
     "slug": "yamibo_manga_reader",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.dukcer.yamibo_manga_reader"
+      "package": "com.ducker.yamibo_manga_reader"
     },
     "web": {
       "favicon": "./assets/favicon.png"

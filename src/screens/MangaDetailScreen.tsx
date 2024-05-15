@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
   Keyboard,
-  Modal,
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
@@ -11,10 +11,10 @@ import {
   View
 } from "react-native";
 import {
-  getThreadAuthorComment,
+  getThreadAuthorComment, getThreadRateInfo,
   getThreadsImageListByWebView,
   initDownloadManga,
-  px2dp,
+  px2dp, rateThread,
   replaceNewlines
 } from "../utils";
 import MangaCoverImage from "../components/MangaCoverImage";
@@ -23,12 +23,16 @@ import {StatusBar} from "expo-status-bar";
 import {appStore} from "../store/appStore";
 import {Feature} from "../../types";
 import {Image} from "expo-image";
+import MyModal from "../components/MyModal";
+import Toast from "react-native-root-toast";
 
 const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation}) => {
   const [loaded, setLoaded] = useState(false)
   const [imageList, setImageList] = useState([])
   const [authorComment, setAuthorComment] = useState(null)
   const [quickSearchShow, setQuickSearchShow] = useState(false)
+  const [queryRatingStatus, setQueryRatingStatus] = useState(false)
+  const [ratingShow, setRatingShow] = useState(false)
   const [textInputValue, setTextInputValue] = useState('')
   const textInputRef = useRef<TextInput>();
   const {id, author, authorName, title, date} = route.params
@@ -52,9 +56,29 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
         setQuickSearchShow(true)
       },
       icon: require('../../assets/search.png')
+    },
+    {
+      title: '评分',
+      operation: () => {
+        setRatingShow(true)
+        setQueryRatingStatus(true)
+        getThreadRateInfo(id).then(res => {
+          setQueryRatingStatus(false)
+          if (res.rated) {
+            setRatingShow(false)
+            Toast.show('抱歉，您不能对同一个帖子重复评分', {position: 0})
+          } else {
+            setRatingShow(true)
+          }
+        }).catch(e => {
+          Toast.show(e, {position: 0})
+          setQueryRatingStatus(false)
+        })
+      },
+      icon: require('../../assets/heart.png')
     }
   ]
-  const modalButtons = [
+  const quickSearchModalButtons = [
     {
       description: "搜索",
       operation: () => {
@@ -69,6 +93,25 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
       }
     }
   ]
+  const ratingModalButtons = [
+    {
+      description: "确定",
+      operation: () => {
+        rateThread(id, ratingScoreTextInputValue, ratingReasonTextInputValue).then(res => {
+          Toast.show('评分成功！', {position: 0})
+        }).catch(e => {
+          Toast.show(String(e), {position: 0})
+        })
+        setRatingShow(false)
+      }
+    },
+    {
+      description: "取消",
+      operation: () => {
+        setRatingShow(false)
+      }
+    }
+  ]
   const onChangeText = (e) => {
     setTextInputValue(e)
   }
@@ -76,8 +119,16 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
   }
   const onFocus = () => {
     Keyboard.addListener('keyboardDidHide', () => {
-      if (textInputRef.current) {
-        textInputRef.current.blur()
+      if (textInputRef.current || ratingScoreTextInputRef.current || ratingReasonTextInputRef.current) {
+        try {
+          textInputRef.current.blur()
+        } catch (e) {
+        }
+        try {
+          ratingScoreTextInputRef.current.blur()
+          ratingReasonTextInputRef.current.blur()
+        } catch (e) {
+        }
         Keyboard.removeAllListeners('keyboardDidHide')
       }
     })
@@ -85,38 +136,56 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
   const onBlur = () => {
     Keyboard.removeAllListeners('keyboardDidHide')
   }
+  const [ratingScoreTextInputValue, setRatingScoreTextInputValue] = useState('5')
+  const ratingScoreTextInputRef = useRef<TextInput>();
+  const [ratingReasonTextInputValue, setRatingReasonTextInputValue] = useState('')
+  const ratingReasonTextInputRef = useRef<TextInput>();
+  const onChangeRatingScoreText = (e) => {
+    setRatingScoreTextInputValue(e)
+  }
+  const onChangeRatingReasonText = (e) => {
+    setRatingReasonTextInputValue(e)
+  }
   return (
     <ScrollView style={[styles.container, styles.page]}>
       <StatusBar backgroundColor={'#FFEDBB'}/>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={quickSearchShow}
-        onRequestClose={() => {
-        }}
-      >
-        <View style={styles.mask}>
-          <View style={styles.modalContainer}>
-            <TextInput allowFontScaling={false} ref={textInputRef} onFocus={onFocus} onBlur={onBlur}
-                       onSubmitEditing={onSubmitEditing} onChangeText={onChangeText} value={textInputValue}
-                       style={{
-                         borderWidth: px2dp(1),
-                         paddingLeft: px2dp(10),
-                         marginBottom: px2dp(10)
-                       }}
-            />
-            <View style={styles.modalButtons}>
-              {
-                modalButtons.map(item => (
-                  <TouchableOpacity key={item.description} onPress={item.operation}>
-                    <MyText style={styles.modalBtn}>{item.description}</MyText>
-                  </TouchableOpacity>
-                ))
-              }
+      <MyModal buttons={quickSearchModalButtons} visible={quickSearchShow}>
+        <TextInput allowFontScaling={false} ref={textInputRef} onFocus={onFocus} onBlur={onBlur}
+                   onSubmitEditing={onSubmitEditing} onChangeText={onChangeText} value={textInputValue}
+                   style={{
+                     borderWidth: px2dp(1),
+                     paddingLeft: px2dp(10),
+                     marginBottom: px2dp(10)
+                   }}
+        />
+      </MyModal>
+      <MyModal buttons={ratingModalButtons} visible={ratingShow} buttonShow={!queryRatingStatus}>
+        {queryRatingStatus ? <ActivityIndicator animating={queryRatingStatus} color={'#551200'}/> :
+          <>
+            <View style={styles.ratingTitle}>
+              <MyText style={styles.ratingTitleText}>评分</MyText>
             </View>
-          </View>
-        </View>
-      </Modal>
+            <View style={styles.ratingFormContainer}>
+              <View style={styles.ratingOption}>
+                <MyText style={styles.ratingOptionLabel}>积分</MyText>
+                <TextInput allowFontScaling={false} ref={ratingScoreTextInputRef} onFocus={onFocus} onBlur={onBlur}
+                           onChangeText={onChangeRatingScoreText} value={ratingScoreTextInputValue}
+                           style={styles.ratingOptionInput} keyboardType={'number-pad'}
+                />
+              </View>
+              <View style={styles.ratingOption}>
+                <MyText style={styles.ratingOptionLabel}>理由</MyText>
+                <TextInput allowFontScaling={false} ref={ratingReasonTextInputRef} onFocus={onFocus} onBlur={onBlur}
+                           onChangeText={onChangeRatingReasonText} value={ratingReasonTextInputValue}
+                           style={styles.ratingOptionInput}
+                           placeholder={'选填评分理由'}
+                />
+                {/*<Image source={require('../../assets/more.png')} style={styles.expandIcon}/>*/}
+              </View>
+            </View>
+          </>
+        }
+      </MyModal>
       {loaded &&
         <>
           <View style={[styles.head]}>
@@ -174,24 +243,6 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
 }
 
 const styles = StyleSheet.create({
-  mask: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  modalContainer: {
-    backgroundColor: '#f8f8e0',
-    width: px2dp(600),
-    padding: px2dp(20)
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between"
-  },
-  modalBtn: {
-    fontWeight: "bold"
-  },
   container: {
     flex: 1
   },
@@ -260,10 +311,10 @@ const styles = StyleSheet.create({
   features: {
     paddingVertical: px2dp(10),
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center"
   },
   feature: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center"
   },
@@ -281,6 +332,37 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold"
   },
-  authorCommentContent: {}
+  authorCommentContent: {},
+  ratingTitle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: px2dp(20)
+  },
+  ratingTitleText: {
+    fontSize: 16,
+    fontWeight: "bold"
+  },
+  ratingFormContainer: {},
+  ratingOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: px2dp(10)
+  },
+  ratingOptionLabel: {
+    marginRight: px2dp(10)
+  },
+  ratingOptionInput: {
+    borderWidth: px2dp(1),
+    paddingLeft: px2dp(10),
+    marginBottom: px2dp(5),
+    marginTop: px2dp(5),
+    flex: 1
+  },
+  expandIcon: {
+    marginLeft: px2dp(5),
+    height: px2dp(40),
+    width: px2dp(40)
+  }
 })
 export default MangaDetailScreen;

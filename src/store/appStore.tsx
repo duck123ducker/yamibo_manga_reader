@@ -38,5 +38,6 @@ export const appStore = proxy({
   },
   showUpdateModal: (message, title) => {
     appStore.updateProps = {message: message, title: title, visible: true}
-  }
+  },
+  urlRequestCache: {}
 })

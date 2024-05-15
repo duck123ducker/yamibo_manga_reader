@@ -28,7 +28,14 @@ const MainWebView: React.FC = () => {
               xhr.open('${tmp[hash].method}', url, true);
               ${(() => {
                 if(tmp[hash].type === 'pic'){
-                  return 'xhr.setRequestHeader(\'Cache-Control\', \'max-age=3600\');'
+                  return 'xhr.setRequestHeader("Cache-Control", "max-age=3600");'
+                }else {
+                  return ''
+                }
+              })()}
+              ${(() => {
+                if(tmp[hash].method === 'POST'){
+                  return 'xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");'
                 }else {
                   return ''
                 }
@@ -145,7 +152,7 @@ const MainWebView: React.FC = () => {
                   }
                 }));
               };
-              xhr.send();
+              xhr.send(${tmp[hash].payload ? "'" + tmp[hash].payload + "'" : ''});
             }
             getRes${hash}();
             true;
