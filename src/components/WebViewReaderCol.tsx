@@ -3,7 +3,7 @@ import {appStore} from "../store/appStore";
 import {getPicByWebView} from "../utils";
 import {WebView} from "react-native-webview";
 
-const WebViewReader: React.FC = ({imageList, paging}) => {
+const WebViewReaderCol: React.FC = ({imageList, paging}) => {
   const webViewRef = createRef<WebView>();
   const [html, setHtml] = useState((() => {
     let tmp = ''
@@ -98,4 +98,4 @@ const WebViewReader: React.FC = ({imageList, paging}) => {
   )
 }
 
-export default memo(WebViewReader)
+export default memo(WebViewReaderCol)

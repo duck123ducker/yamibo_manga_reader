@@ -1,15 +1,16 @@
-import React, {useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Button, ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
 import {appStore} from "../store/appStore";
-import {clearCache, px2dp, webViewRedirectTo} from "../utils";
+import {clearCache, px2dp, switchReadDirection, switchReadRowDirection, webViewRedirectTo} from "../utils";
 import CookieManager from "@react-native-cookies/cookies";
 import {MMKVStorage} from "../store/MKKVStorage";
 import MyText from "../components/MyText";
 import {Image} from "expo-image";
 import {StatusBar} from "expo-status-bar";
-import UpdateModal from "../components/UpdateModal";
+import {ENUM_READ_DIRECTION, ENUM_ROW_DIRECTION} from "../constants/types";
 
 const SettingScreen: React.FC = ({navigation}) => {
+  const [key, setKey] = useState<number>(0)
   const resetCookies = () => {
     CookieManager.clearAll().then(r => {
       MMKVStorage.set('loginStatus', false)
@@ -20,18 +21,28 @@ const SettingScreen: React.FC = ({navigation}) => {
       appStore.webViewMode = 'login'
     })
   }
-  const settingOptions = [
-    {
-      description: '清除缓存',
-      operation: clearCache
-    },
-    {
-      description: '更新与支持',
-      operation: () => {
-        navigation.navigate('AboutScreen')
+  const settingOptions = useMemo(()=>{
+    return [
+      {
+        description: '清除缓存',
+        operation: clearCache
+      },
+      {
+        description: '阅读方向' + (appStore.config.readDirection === ENUM_READ_DIRECTION.COL ? '(竖向)' : '(横向)'),
+        operation: switchReadDirection
+      },
+      {
+        description: '横向方向' + (appStore.config.readRowDirection === ENUM_ROW_DIRECTION.R_TO_L ? '(从右至左)' : '(从左至右)'),
+        operation: switchReadRowDirection
+      },
+      {
+        description: '更新与支持',
+        operation: (setKey) => {
+          navigation.navigate('AboutScreen')
+        }
       }
-    }
-  ]
+    ]
+  },[key])
   const isOdd = (number) => {
     return number % 2 !== 0;
   }
@@ -54,13 +65,13 @@ const SettingScreen: React.FC = ({navigation}) => {
         <StatusBar backgroundColor={'#ffe6b7'}/>
       </View>
       <View style={[styles.options]}>
-        <View style={styles.optionsContainer}>
+        <View style={styles.optionsContainer} key={key}>
           {
             settingOptions.map((option, index) => (
               <View key={option.description}>
                 <TouchableOpacity
                   style={[styles.option, isOdd(index) ? styles.oddOption : {}, index + 1 === settingOptions.length ? styles.lastOption : {}]}
-                  onPress={option.operation}>
+                  onPress={()=>{option.operation(setKey)}}>
                   <MyText style={styles.description}>{option.description}</MyText>
                   <Image style={styles.forward} source={require('../../assets/foward.png')}/>
                 </TouchableOpacity>

@@ -2,7 +2,7 @@
   "expo": {
     "name": "300阅读器",
     "slug": "yamibo_manga_reader",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

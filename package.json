@@ -1,6 +1,6 @@
 {
   "name": "yamibo_manga_reader",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
@@ -29,6 +29,7 @@
     "react-native": "0.73.6",
     "react-native-gesture-handler": "~2.14.0",
     "react-native-mmkv": "^2.12.1",
+    "react-native-quick-base64": "^2.1.2",
     "react-native-reanimated": "~3.6.2",
     "react-native-root-toast": "^3.5.1",
     "react-native-safe-area-context": "4.8.2",

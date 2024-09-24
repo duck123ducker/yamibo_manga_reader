@@ -16,6 +16,8 @@ import {
   readDirectoryAsync,
   writeAsStringAsync
 } from "expo-file-system";
+import {LOGIN_URL, NO_CACHE_LIST} from "../constants/urls";
+import {ENUM_READ_DIRECTION, ENUM_ROW_DIRECTION} from "../constants/types";
 
 
 const fileReader = new FileReader();
@@ -33,7 +35,13 @@ export function getHash() {
 
 export function getDocByWebView(url: String, method = 'GET', timeout: number = 30000, payload = null) {
   return new Promise((resolve, reject) => {
-    if (appStore.urlRequestCache.hasOwnProperty(url) && !url.includes('action=rate')) {
+    const cacheFlag = (()=>{
+      for (const flag of NO_CACHE_LIST) {
+        if (url.includes(flag)) return true
+      }
+      return false
+    })()
+    if (appStore.urlRequestCache.hasOwnProperty(url) && !cacheFlag) {
       resolve(appStore.urlRequestCache[url])
     } else {
       const hash = getHash()
@@ -589,7 +597,7 @@ const clearDirectory = async (directoryUri) => {
   }
 };
 
-export async function clearCache() {
+export async function clearCache(setKey) {
   await clearDirectory(documentDirectory + `cache/`)
   await clearDirectory(documentDirectory + `downloads/`)
   MMKVStorage.getAllKeys().forEach(key => {
@@ -603,7 +611,7 @@ export async function clearCache() {
 
 export async function checkLogin() {
   return new Promise((resolve, reject) => {
-    getDocByWebView('https://bbs.yamibo.com/member.php?mod=logging&action=login&mobile=2').then(res => {
+    getDocByWebView(LOGIN_URL).then(res => {
       const root = parse(String(res));
       const loginBtn = root.querySelector('div.btn_login');
       if (!loginBtn) {
@@ -638,4 +646,22 @@ export async function checkUpdate() {
       }
     })
   })
+}
+
+export async function switchReadDirection(setKey) {
+  appStore.config.readDirection = appStore.config.readDirection ? ENUM_READ_DIRECTION.COL : ENUM_READ_DIRECTION.ROW;
+  saveConfig()
+  setKey((prev)=>{return prev + 1})
+  Toast.show('切换成功！', {position: 0})
+}
+
+export async function switchReadRowDirection(setKey) {
+  appStore.config.readRowDirection = appStore.config.readRowDirection ? ENUM_ROW_DIRECTION.R_TO_L : ENUM_ROW_DIRECTION.L_TO_R;
+  saveConfig()
+  setKey((prev)=>{return prev + 1})
+  Toast.show('切换成功！', {position: 0})
+}
+
+export function saveConfig() {
+  MMKVSetJson('config', appStore.config)
 }

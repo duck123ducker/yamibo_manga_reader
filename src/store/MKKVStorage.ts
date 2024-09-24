@@ -3,11 +3,15 @@ import {MMKV} from "react-native-mmkv";
 export const MMKVStorage = new MMKV()
 
 export function MMKVGetJson(key) {
-  if (key.includes('.')) {
-    const keys = key.split('.')
-    return JSON.parse(MMKVStorage.getString(keys[0]))[keys[1]]
-  } else {
-    return JSON.parse(MMKVStorage.getString(key))
+  try {
+    if (key.includes('.')) {
+      const keys = key.split('.')
+      return JSON.parse(MMKVStorage.getString(keys[0]))[keys[1]]
+    } else {
+      return JSON.parse(MMKVStorage.getString(key))
+    }
+  } catch (e) {
+    throw new Error()
   }
 }
 

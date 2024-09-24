@@ -1,5 +1,6 @@
 import {proxy} from 'valtio'
-import {MMKVGetJson} from "./MKKVStorage";
+import {MMKVGetJson, MMKVSetJson} from "./MKKVStorage";
+import {ENUM_READ_DIRECTION, ENUM_ROW_DIRECTION} from "../constants/types";
 
 export const appStore = proxy({
   webViewShow: false,
@@ -39,5 +40,17 @@ export const appStore = proxy({
   showUpdateModal: (message, title) => {
     appStore.updateProps = {message: message, title: title, visible: true}
   },
-  urlRequestCache: {}
+  urlRequestCache: {},
+  config: (() => {
+    const defaultConfig = {
+      readDirection: ENUM_READ_DIRECTION.COL,
+      readRowDirection: ENUM_ROW_DIRECTION.R_TO_L
+    }
+    try {
+      return Object.assign({}, defaultConfig, MMKVGetJson('config'))
+    } catch (e) {
+      MMKVSetJson('config', defaultConfig)
+      return defaultConfig
+    }
+  })()
 })

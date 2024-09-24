@@ -1,38 +1,40 @@
 import React, {memo, useEffect, useRef, useState} from 'react';
 import {NativeScrollEvent, NativeSyntheticEvent, View} from "react-native";
-import {getPicByWebView} from "../utils";
+// import {getPicByWebView} from "../utils";
 import {appStore} from "../store/appStore";
 import {StatusBar} from "expo-status-bar";
-import WebViewReader from "../components/WebViewReader";
 import ProgressStatusBar from "../components/progressStatusBar";
+import {ENUM_READ_DIRECTION} from "../constants/types";
+import WebViewReaderRow from "../components/WebViewReaderRow";
+import WebViewReaderCol from "../components/WebViewReaderCol";
 
 
-const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation}) => {
+const MangaReaderScreen: React.FC<{ route, navigation }> = ({route, navigation}) => {
   const {imageList} = route.params
-  const [imageBase64Dict, setImageBase64Dict] = useState({})
-  const [scrollViewOffsetY, setScrollViewOffsetY] = useState<number>(0);
-  const scrollViewRef = useRef(null);
-  const [visibleHeight, setVisibleHeight] = useState(0);
-  const getPics = async () => {
-    for (const [index, link] of imageList.entries()) {
-      if (appStore.reading) {
-        const picData = await getPicByWebView(link)
-        setImageBase64Dict(prevState => ({
-          ...prevState,
-          [link]: picData
-        }));
-      }
-    }
-  }
-  const handleLayout = (event) => {
-    const {height} = event.nativeEvent.layout;
-    setVisibleHeight(height);
-  };
-  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    let {y} = e.nativeEvent.contentOffset
-    setScrollViewOffsetY(y)
+  // const [imageBase64Dict, setImageBase64Dict] = useState({})
+  // const [scrollViewOffsetY, setScrollViewOffsetY] = useState<number>(0);
+  // const scrollViewRef = useRef(null);
+  // const [visibleHeight, setVisibleHeight] = useState(0);
+  // const getPics = async () => {
+  //   for (const [index, link] of imageList.entries()) {
+  //     if (appStore.reading) {
+  //       const picData = await getPicByWebView(link)
+  //       setImageBase64Dict(prevState => ({
+  //         ...prevState,
+  //         [link]: picData
+  //       }));
+  //     }
+  //   }
+  // }
+  // const handleLayout = (event) => {
+  //   const {height} = event.nativeEvent.layout;
+  //   setVisibleHeight(height);
+  // };
+  // const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+  //   let {y} = e.nativeEvent.contentOffset
+  //   setScrollViewOffsetY(y)
     // console.log('scroll:' + String(y))
-  }
+  // }
   // useEffect(()=>{
   //     if (webViewRef.current !== null){
   //         appStore.reading = true
@@ -55,7 +57,11 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
       <View style={{position: 'absolute', zIndex: 999, right: 0}}>
         <ProgressStatusBar totalPage={imageList.length}/>
       </View>
-      <WebViewReader imageList={imageList} paging={paging}/>
+      {
+        appStore.config.readDirection === ENUM_READ_DIRECTION.ROW ?
+          <WebViewReaderRow key={Date.now()} imageList={imageList} paging={paging} readRowDirection={appStore.config.readRowDirection}/> :
+          <WebViewReaderCol key={Date.now()} imageList={imageList} paging={paging}/>
+      }
       {/*<ScrollView nestedScrollEnabled={true} ref={scrollViewRef} onLayout={handleLayout} onScroll={handleScroll}*/}
       {/*            showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>*/}
       {/*  <View>*/}
@@ -83,4 +89,4 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
   )
 }
 
-export default memo(MangaDetailScreen);
+export default memo(MangaReaderScreen);
