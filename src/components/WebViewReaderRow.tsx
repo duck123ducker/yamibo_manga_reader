@@ -46,19 +46,8 @@ const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
               display: flex;
               flex-direction: row;
             }
-            .click-warapper.transparent-area {
-              pointer-events: none; /* 透明区域让点击事件穿透 */
-            }
-            .left-area {
-              flex: 3;
-            }
-            .center-area {
-              flex: 4;
-              background: blue;
-            }
-            .right-area {
-              flex: 3;
-              background: aliceblue;
+            .swiper-slide img {
+              min-width: 100vw;
             }
             .slider-container {
               position: fixed;
