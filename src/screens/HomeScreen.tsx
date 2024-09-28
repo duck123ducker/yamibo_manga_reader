@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View} from "react-native";
 import {useSnapshot} from "valtio/react";
 import {appStore} from "../store/appStore";
@@ -6,7 +6,6 @@ import Mangas from "../components/Mangas";
 import {webViewRedirectTo} from "../utils";
 import MyText from "../components/MyText";
 import {MMKVStorage} from "../store/MKKVStorage";
-
 const HomeScreen: React.FC<{ route, navigation }> = ({route, navigation}) => {
   const {loggingStatus} = useSnapshot(appStore)
   if (!MMKVStorage.getBoolean('loginStatus')) {

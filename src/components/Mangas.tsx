@@ -186,7 +186,7 @@ const Mangas: React.FC<{ route, navigation }> = ({route, navigation}) => {
   })
   return (
     <>
-      <StatusBar backgroundColor={'#FFEDBC'}/>
+      <StatusBar backgroundColor={'#FFEDBC'} translucent={false}/>
       <View style={{backgroundColor: '#f8f8e0', flex: 1, position: 'relative'}}>
         {/*<LoadingModal visible={loading} message={'搜索中...'}/>*/}
         <View style={{

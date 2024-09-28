@@ -52,5 +52,5 @@ export const appStore = proxy({
       MMKVSetJson('config', defaultConfig)
       return defaultConfig
     }
-  })()
+  })(),
 })

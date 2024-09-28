@@ -16,8 +16,9 @@ import {
   readDirectoryAsync,
   writeAsStringAsync
 } from "expo-file-system";
-import {LOGIN_URL, NO_CACHE_LIST} from "../constants/urls";
+import {getMobileThreadUrl, LOGIN_URL, NO_CACHE_LIST} from "../constants/urls";
 import {ENUM_READ_DIRECTION, ENUM_ROW_DIRECTION} from "../constants/types";
+import {WIDTH} from "../constants/Dimensions";
 
 
 const fileReader = new FileReader();
@@ -238,7 +239,7 @@ export function errorHandler(code) {
 
 export function px2dp(uiElementPx) {
   const uiWidthPx = 750;
-  return (uiElementPx * Dimensions.get("window").width) / uiWidthPx;
+  return (uiElementPx * WIDTH) / uiWidthPx;
 }
 
 export function uniqueJsonArray(array) {
@@ -664,4 +665,51 @@ export async function switchReadRowDirection(setKey) {
 
 export function saveConfig() {
   MMKVSetJson('config', appStore.config)
+}
+
+export const fillInfoById = async (id: string): Promise<{ id: string; author: string; authorName: string; title: string; date: string }> => {
+  return new Promise((resolve, reject) => {
+    getDocByWebView(getMobileThreadUrl(id)).then(res => {
+      try{
+        const document = parse(String(res));
+        const authUlEle = document.querySelector('ul.authi');
+        const authorNameEle = authUlEle.querySelector('span.z').querySelector('a')
+        const authorName = authorNameEle.innerText.trim()
+        const author = authorNameEle.getAttribute('href').split('uid=')[1].split('&')[0]
+        const titleEle = document.querySelector('div.view_tit')
+        const title = titleEle.lastChild.textContent.trim()
+        const dateEle = document.querySelector('li.mtime')
+        const date = dateEle.lastChild.textContent.trim()
+        const result = {
+          id,
+          author,
+          authorName,
+          title,
+          date
+        }
+        resolve(result)
+      }catch (e) {
+        reject(e)
+      }
+    }).catch(e => { reject(e) })
+  })
+};
+
+export function getQueryValue(url, key) {
+  const queryString = url.split('?').pop().split('#')[0];
+  const regex = /([^&=]+)=([^&]*)/g;
+  let match;
+  while ((match = regex.exec(queryString))) {
+    if (decodeURIComponent(match[1]) === key) {
+      return decodeURIComponent(match[2]);
+    }
+  }
+  const simpleParams = queryString.split('&');
+  for (const param of simpleParams) {
+    const [k, v] = param.split('=');
+    if (decodeURIComponent(k) === key) {
+      return decodeURIComponent(v);
+    }
+  }
+  return null;
 }

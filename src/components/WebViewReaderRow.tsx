@@ -53,11 +53,12 @@ const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
               position: fixed;
               bottom: 0;
               width: 100vw;
-              background: #FFEDBB;
+              background: #434343;
               z-index: 10;
               height: 10vw;
               display: none;
               align-items: center;
+              color: #ffffff;
             }
             .progress-text {
               font-size: 3vw;
@@ -71,7 +72,7 @@ const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
           </style>
         </head>
         <body style="padding: 0; margin: 0;">
-          <div ${readRowDirection === ENUM_ROW_DIRECTION.R_TO_L ? 'dir="rtl"' : ''} class="swiper mySwiper swiper-h" style="background: #f8f8e0;">
+          <div ${readRowDirection === ENUM_ROW_DIRECTION.R_TO_L ? 'dir="rtl"' : ''} class="swiper mySwiper swiper-h" style="background: #000000;">
             <div class="swiper-wrapper">
               ${tmp}
             </div>
