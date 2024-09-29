@@ -7,10 +7,25 @@ import ProgressStatusBar from "../components/progressStatusBar";
 import {ENUM_READ_DIRECTION} from "../constants/types";
 import WebViewReaderRow from "../components/WebViewReaderRow";
 import WebViewReaderCol from "../components/WebViewReaderCol";
+import {VolumeManager} from 'react-native-volume-manager';
 
 
 const MangaReaderScreen: React.FC<{ route, navigation }> = ({route, navigation}) => {
   const {imageList} = route.params
+  useEffect(() => {
+    // 自己瞎改的安卓原生包，比较烂，不过能用就行
+    VolumeManager.activateKeyListener()
+    VolumeManager.activateKeyListener()
+    const volumeListener = VolumeManager.addVolumeListener((result) => {
+      console.log('Volume changed' + JSON.stringify(result));
+    });
+
+    return () => {
+      VolumeManager.inactivateKeyListener();
+      VolumeManager.inactivateKeyListener();
+      volumeListener.remove();
+    };
+  }, []);
   // const [imageBase64Dict, setImageBase64Dict] = useState({})
   // const [scrollViewOffsetY, setScrollViewOffsetY] = useState<number>(0);
   // const scrollViewRef = useRef(null);
