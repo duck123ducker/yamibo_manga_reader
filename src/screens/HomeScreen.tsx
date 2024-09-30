@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {View} from "react-native";
 import {useSnapshot} from "valtio/react";
 import {appStore} from "../store/appStore";
