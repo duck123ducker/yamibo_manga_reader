@@ -93,7 +93,9 @@ const CommentScreen: React.FC<{ route, navigation }> = ({route, navigation}) => 
       style.appendChild(document.createTextNode(css));
       document.head.appendChild(style);
       document.querySelectorAll('a').forEach(function(link) {
-        link.setAttribute('target', '_blank');
+        if(!link.href.startsWith('javascript')){
+          link.setAttribute('target', '_blank');
+        }
       });
       var author = document.querySelector('div.message');
       var links = author.querySelectorAll('a.orange');

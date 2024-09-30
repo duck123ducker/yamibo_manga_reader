@@ -69,7 +69,9 @@ const BrowserWebview: React.FC<{url: string, navigation}> = ({url, navigation}) 
         'msg': {}
       }));
       document.querySelectorAll('a').forEach(function(link) {
-        link.setAttribute('target', '_blank');
+        if(!link.href.startsWith('javascript')){
+          link.setAttribute('target', '_blank');
+        }
       });
     })
   `, [])

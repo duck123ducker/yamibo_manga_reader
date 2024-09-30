@@ -80,7 +80,9 @@ const CommentsWebview: React.FC<{ tid: string, webviewHeight: number }> = ({tid,
       document.head.appendChild(style);
       document.querySelector('body').style.setProperty('--dz-BG-0', '#f8f8e0');
       document.querySelectorAll('a').forEach(function(link) {
+        if(!link.href.startsWith('javascript')){
           link.setAttribute('target', '_blank');
+        }
       });
       var headerPadding = document.getElementById('header-padding');
       if (headerPadding) headerPadding.remove();
