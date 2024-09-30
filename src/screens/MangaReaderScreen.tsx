@@ -1,6 +1,5 @@
-import React, {memo, useEffect, useRef, useState} from 'react';
-import {NativeScrollEvent, NativeSyntheticEvent, View} from "react-native";
-// import {getPicByWebView} from "../utils";
+import React, {memo, useEffect, useMemo, useRef} from 'react';
+import {View} from "react-native";
 import {appStore} from "../store/appStore";
 import {StatusBar} from "expo-status-bar";
 import ProgressStatusBar from "../components/progressStatusBar";
@@ -8,24 +7,33 @@ import {ENUM_READ_DIRECTION} from "../constants/types";
 import WebViewReaderRow from "../components/WebViewReaderRow";
 import WebViewReaderCol from "../components/WebViewReaderCol";
 import {VolumeManager} from 'react-native-volume-manager';
+import {storageReadProgress} from "../utils";
 
 
 const MangaReaderScreen: React.FC<{ route, navigation }> = ({route, navigation}) => {
-  const {imageList} = route.params
+  const {imageList, id} = route.params
+  const childRef = useRef();
   useEffect(() => {
     // 自己瞎改的安卓原生包，比较烂，不过能用就行
-    VolumeManager.activateKeyListener()
-    VolumeManager.activateKeyListener()
-    const volumeListener = VolumeManager.addVolumeListener((result) => {
-      console.log('Volume changed' + JSON.stringify(result));
-    });
-
+    const volPaging = appStore.config.volPaging
+    let volumeListener;
+    if(volPaging) {
+      VolumeManager.activateKeyListener()
+      VolumeManager.activateKeyListener()
+      volumeListener = VolumeManager.addVolumeListener((result) => {
+        console.log('Volume changed' + JSON.stringify(result));
+        if(result.press === 'up') childRef.current.prev();
+        else if (result.press === 'down') childRef.current.next();
+      });
+    }
     return () => {
-      VolumeManager.inactivateKeyListener();
-      VolumeManager.inactivateKeyListener();
-      volumeListener.remove();
+      if(volPaging) {
+        VolumeManager.inactivateKeyListener();
+        VolumeManager.inactivateKeyListener();
+        volumeListener.remove();
+      }
     };
-  }, []);
+  }, [childRef]);
   // const [imageBase64Dict, setImageBase64Dict] = useState({})
   // const [scrollViewOffsetY, setScrollViewOffsetY] = useState<number>(0);
   // const scrollViewRef = useRef(null);
@@ -57,13 +65,20 @@ const MangaReaderScreen: React.FC<{ route, navigation }> = ({route, navigation})
   //     }
   //     return ()=>{appStore.reading=false}
   // },[])
+  const initPage = useMemo(() => {
+    const page = Math.min(appStore.readProgress[String(id)] || 1, imageList.length)
+    appStore.readingPage = page
+    return page
+  }, [])
   useEffect(() => {
     return () => {
       appStore.reading = false
     }
   }, [])
   const paging = (msg) => {
-    appStore.readingPage = msg.top + 1
+    const page = msg.top + 1
+    appStore.readingPage = page
+    storageReadProgress(id, page)
   }
   // console.log('rerender')
   return (
@@ -74,8 +89,8 @@ const MangaReaderScreen: React.FC<{ route, navigation }> = ({route, navigation})
       </View>
       {
         appStore.config.readDirection === ENUM_READ_DIRECTION.ROW ?
-          <WebViewReaderRow key={Date.now()} imageList={imageList} paging={paging} readRowDirection={appStore.config.readRowDirection}/> :
-          <WebViewReaderCol key={Date.now()} imageList={imageList} paging={paging}/>
+          <WebViewReaderRow ref={childRef} initPage={initPage} key={Date.now()} imageList={imageList} paging={paging} readRowDirection={appStore.config.readRowDirection}/> :
+          <WebViewReaderCol ref={childRef} initPage={initPage} key={Date.now()} imageList={imageList} paging={paging}/>
       }
       {/*<ScrollView nestedScrollEnabled={true} ref={scrollViewRef} onLayout={handleLayout} onScroll={handleScroll}*/}
       {/*            showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>*/}

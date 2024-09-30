@@ -1,7 +1,8 @@
 import {subscribe} from "valtio";
 import {appStore} from "../store/appStore";
-import {getPicByWebView, MMKVGetJson, MMKVSetJson, url2FileName} from "../utils";
+import {getPicByWebView, url2FileName} from "../utils";
 import * as FileSystem from "expo-file-system";
+import {MMKVGetJson, MMKVSetJson} from "../store/MKKVStorage";
 
 let mangaQueue = []
 let downloading = false

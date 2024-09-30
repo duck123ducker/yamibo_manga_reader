@@ -1,5 +1,5 @@
 export interface Feature {
   title: string;
   operation: Function;
-  icon?: string;
+  icon?: any;
 }

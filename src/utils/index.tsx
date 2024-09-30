@@ -17,8 +17,11 @@ import {
   writeAsStringAsync
 } from "expo-file-system";
 import {getMobileThreadUrl, LOGIN_URL, NO_CACHE_LIST} from "../constants/urls";
-import {ENUM_READ_DIRECTION, ENUM_ROW_DIRECTION} from "../constants/types";
+import {ENUM_READ_DIRECTION, ENUM_ROW_DIRECTION, ENUM_SETTING_DIRECTION} from "../constants/types";
 import {WIDTH} from "../constants/Dimensions";
+import {RefObject} from "react";
+import {WebView} from "react-native-webview";
+import app from "../../App";
 
 
 const fileReader = new FileReader();
@@ -598,7 +601,7 @@ const clearDirectory = async (directoryUri) => {
   }
 };
 
-export async function clearCache(setKey) {
+export async function clearCache() {
   await clearDirectory(documentDirectory + `cache/`)
   await clearDirectory(documentDirectory + `downloads/`)
   MMKVStorage.getAllKeys().forEach(key => {
@@ -649,18 +652,19 @@ export async function checkUpdate() {
   })
 }
 
-export async function switchReadDirection(setKey) {
+export async function switchReadDirection() {
   appStore.config.readDirection = appStore.config.readDirection ? ENUM_READ_DIRECTION.COL : ENUM_READ_DIRECTION.ROW;
   saveConfig()
-  setKey((prev)=>{return prev + 1})
-  Toast.show('切换成功！', {position: 0})
 }
 
-export async function switchReadRowDirection(setKey) {
+export async function switchReadRowDirection() {
   appStore.config.readRowDirection = appStore.config.readRowDirection ? ENUM_ROW_DIRECTION.R_TO_L : ENUM_ROW_DIRECTION.L_TO_R;
   saveConfig()
-  setKey((prev)=>{return prev + 1})
-  Toast.show('切换成功！', {position: 0})
+}
+
+export async function switchVolPaging() {
+  appStore.config.volPaging = !appStore.config.volPaging;
+  saveConfig()
 }
 
 export function saveConfig() {
@@ -712,4 +716,90 @@ export function getQueryValue(url, key) {
     }
   }
   return null;
+}
+
+export const storageReadProgress = (id: string, page: number) => {
+  appStore.readProgress[String(id)] = page
+  MMKVSetJson('readProgress', appStore.readProgress)
+}
+
+export const insertImageToWebview = (webViewRef: RefObject<WebView>, index: number, picData) => {
+  if (webViewRef.current) {
+    webViewRef.current.injectJavaScript(`
+      try{
+        var divElement = document.querySelector('div[id="${index}"]');
+        var imgElement = document.createElement('img');
+        imgElement.src = '${picData.result}';
+        imgElement.style.width = '100vw';
+        while (divElement.firstChild) {
+          divElement.removeChild(divElement.firstChild);
+        }
+        divElement.appendChild(imgElement);
+      }catch(e){
+      // ReactNativeWebView.postMessage(e.toString())
+      }
+    `)
+  }
+}
+
+export const getPicListThread = async (imageList: string[], webViewRef: RefObject<WebView>) => {
+  appStore.reading = true
+  let errCount = 0;
+  const finishMap = {};
+  while(Object.keys(finishMap).length < imageList.length && errCount < 5 && appStore.reading) {
+    try{
+      let index = appStore.readingPage - 1
+      const target = imageList[index]
+      if(!finishMap[target]) {
+        console.log(index)
+        const picData = await getPicByWebView(target)
+        insertImageToWebview(webViewRef, index, picData)
+        finishMap[target] = true
+      }else {
+        // 优先往后找
+        let behindFinish = index + 1 === imageList.length;
+        while(index + 1 < imageList.length) {
+          index++
+          const target = imageList[index]
+          if(!finishMap[target]) {
+            console.log(index)
+            const picData = await getPicByWebView(target)
+            insertImageToWebview(webViewRef, index, picData)
+            finishMap[target] = true
+            if(index === imageList.length - 1) behindFinish = true
+            break
+          }else if(index === imageList.length - 1) behindFinish = true
+        }
+        // 其次往前找
+        if(behindFinish) {
+          index = appStore.readingPage - 1
+          while(index >= 1) {
+            index--
+            const target = imageList[index]
+            if(!finishMap[target]) {
+              console.log(index)
+              const picData = await getPicByWebView(target)
+              insertImageToWebview(webViewRef, index, picData)
+              finishMap[target] = true
+              break
+            }
+          }
+        }
+      }
+    }catch (e) {
+      errCount++
+    }
+  }
+}
+
+export const getSettingReadDirection = (): ENUM_SETTING_DIRECTION => {
+  if(appStore.config.readDirection === ENUM_READ_DIRECTION.COL) {
+    return ENUM_SETTING_DIRECTION.T_TO_B
+  }else if(appStore.config.readDirection === ENUM_READ_DIRECTION.ROW) {
+    if(appStore.config.readRowDirection === ENUM_ROW_DIRECTION.R_TO_L) {
+      return ENUM_SETTING_DIRECTION.R_TO_L
+    }else if(appStore.config.readRowDirection === ENUM_ROW_DIRECTION.L_TO_R) {
+      return ENUM_SETTING_DIRECTION.L_TO_R
+    }
+  }
 }

@@ -7,6 +7,7 @@ import {appStore} from "../store/appStore";
 import {Image} from "expo-image";
 import {px2dp} from "../utils";
 import MyText from "./MyText";
+import {NO_AVATAR_ICON} from "../constants/images";
 
 const CustomDrawer: React.FC = (props) => {
   const {myInfo} = useSnapshot(appStore)
@@ -16,7 +17,7 @@ const CustomDrawer: React.FC = (props) => {
         <View style={styles.avatar}>
           {myInfo.avatarUri === '' ?
             <Image style={[{height: '100%', width: '100%'}, styles.image]}
-                   source={require('../../assets/noavatar.png')}/> :
+                   source={{uri: NO_AVATAR_ICON}}/> :
             <ImageLoader height={px2dp(150)} width={px2dp(150)} resizeMode={'cover'} imageStyle={styles.image}
                          uri={myInfo.avatarUri}/>
           }

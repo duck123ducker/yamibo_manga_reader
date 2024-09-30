@@ -7,6 +7,8 @@ import MangaNativeWebviewScreen from "../screens/MangaNativeWebviewScreen";
 import MangaDetailLoadingScreen from "../screens/MangaDetailLoadingScreen";
 import MenuScreen from "../screens/MenuScreen";
 import CommentScreen from "../screens/CommentScreen";
+import {px2dp} from "../utils";
+import ThreadNativeWebviewScreen from "../screens/ThreadNativeWebviewScreen";
 
 
 const Stack = createStackNavigator();
@@ -20,7 +22,19 @@ function StackScreens() {
       <Stack.Screen name="MangaReader" component={MangaReaderScreen}/>
       <Stack.Screen name="MangaNativeWebview" component={MangaNativeWebviewScreen}/>
       <Stack.Screen name="Menu" component={MenuScreen}/>
-      <Stack.Screen name="Comment" component={CommentScreen}/>
+      <Stack.Screen name="ThreadNativeWebview" component={ThreadNativeWebviewScreen}/>
+      <Stack.Screen
+        name="Comment"
+        component={CommentScreen}
+        options={{
+          headerShown: true,
+          headerStyle: {backgroundColor: '#551200', height: px2dp(80)},
+          headerStatusBarHeight: 0,
+          headerTintColor: '#fff',
+          headerTitleStyle: {fontWeight: 'normal'},
+          headerTitle: '评论区'
+        }}
+      />
     </Stack.Navigator>
   );
 }

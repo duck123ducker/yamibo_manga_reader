@@ -2,7 +2,7 @@ import React, {createRef, useEffect} from "react";
 import {useSnapshot} from "valtio/react";
 import {appStore} from "../store/appStore";
 import {WebView, WebViewNavigation} from "react-native-webview";
-import {subscribe} from "valtio/esm";
+import {subscribe} from "valtio";
 import {NativeSyntheticEvent} from "react-native";
 import {WebViewMessage} from "react-native-webview/lib/WebViewTypes";
 import {getSignedUrl} from "../utils";

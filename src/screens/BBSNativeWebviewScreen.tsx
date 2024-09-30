@@ -1,30 +1,11 @@
-import React, {useCallback, useState} from "react";
-import {WebView} from "react-native-webview";
-import {WebViewOpenWindowEvent} from "react-native-webview/lib/WebViewTypes";
-import {useFocusEffect} from "@react-navigation/native";
+import React from "react";
+import BrowserWebview from "../components/BrowserWebview";
+import {HOME_URL} from "../constants/urls";
 
 const BBSNativeWebviewScreen: React.FC = ({navigation}) => {
-  const [uri, setUri] = useState('https://bbs.yamibo.com/forum.php?mobile=2')
-  const onOpenWindow = (e: WebViewOpenWindowEvent) => {
-    setUri(e.nativeEvent.targetUrl)
-  }
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        setUri('')
-        setImmediate(() => {
-          setUri('https://bbs.yamibo.com/forum.php?mobile=2')
-        })
-      };
-    }, [])
-  );
+
   return (
-    <>
-      <WebView
-        onOpenWindow={onOpenWindow}
-        source={{uri: uri}}
-      />
-    </>
+    <BrowserWebview url={HOME_URL} navigation={navigation}/>
   )
 }
 

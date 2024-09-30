@@ -1,6 +1,7 @@
 import {proxy} from 'valtio'
 import {MMKVGetJson, MMKVSetJson} from "./MKKVStorage";
 import {ENUM_READ_DIRECTION, ENUM_ROW_DIRECTION} from "../constants/types";
+import {storageReadProgress} from "../utils";
 
 export const appStore = proxy({
   webViewShow: false,
@@ -43,14 +44,24 @@ export const appStore = proxy({
   urlRequestCache: {},
   config: (() => {
     const defaultConfig = {
-      readDirection: ENUM_READ_DIRECTION.COL,
-      readRowDirection: ENUM_ROW_DIRECTION.R_TO_L
+      readDirection: ENUM_READ_DIRECTION.ROW,
+      readRowDirection: ENUM_ROW_DIRECTION.R_TO_L,
+      volPaging: true
     }
     try {
       return Object.assign({}, defaultConfig, MMKVGetJson('config'))
     } catch (e) {
       MMKVSetJson('config', defaultConfig)
       return defaultConfig
+    }
+  })(),
+  readProgress: (() => {
+    const defaultProgress = {}
+    try {
+      return Object.assign({}, defaultProgress, MMKVGetJson('readProgress'))
+    } catch (e) {
+      MMKVSetJson('readProgress', defaultProgress)
+      return defaultProgress
     }
   })(),
 })

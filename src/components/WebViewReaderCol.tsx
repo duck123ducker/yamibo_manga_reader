@@ -1,9 +1,19 @@
-import React, {createRef, memo, useState} from "react";
+import React, {createRef, forwardRef, memo, useImperativeHandle, useState} from "react";
 import {appStore} from "../store/appStore";
-import {getPicByWebView} from "../utils";
+import {getPicListThread} from "../utils";
 import {WebView} from "react-native-webview";
 
-const WebViewReaderCol: React.FC = ({imageList, paging}) => {
+const WebViewReaderCol = forwardRef(({ imageList, paging, initPage }, ref) => {
+  useImperativeHandle(ref, () => ({
+    prev() {
+      if(appStore.readingPage !== 0)
+        webViewRef.current?.injectJavaScript(`document.getElementById("${appStore.readingPage - 2}").scrollIntoView({ behavior: 'auto' });`)
+    },
+    next() {
+      if(appStore.readingPage !== imageList.length)
+        webViewRef.current?.injectJavaScript(`document.getElementById("${appStore.readingPage}").scrollIntoView({ behavior: 'auto' });`)
+    }
+  }));
   const webViewRef = createRef<WebView>();
   const [html, setHtml] = useState((() => {
     let tmp = ''
@@ -21,6 +31,14 @@ const WebViewReaderCol: React.FC = ({imageList, paging}) => {
         ${tmp}
         <script>
           var scrolling = false;
+          window.onload = function() {
+            setTimeout(() => {
+              const element = document.getElementById("${initPage - 1}");
+              if (element) {
+                  element.scrollIntoView({ behavior: 'auto' });
+              }
+            }, 300);
+          };
           function throttleScroll() {
             if (!scrolling) {
               scrolling = true;
@@ -43,29 +61,7 @@ const WebViewReaderCol: React.FC = ({imageList, paging}) => {
     return tmpHtml
   })());
   const onLoadEnd = async () => {
-    appStore.reading = true
-    for (const [index, link] of imageList.entries()) {
-      if (appStore.reading) {
-        const picData = await getPicByWebView(link)
-        if (webViewRef.current) {
-          webViewRef.current.injectJavaScript(`
-            try{
-              var divElement = document.querySelector('div[id="${index}"]');
-              var imgElement = document.createElement('img');
-              imgElement.src = '${picData.result}';
-              imgElement.style.width = '100vw';
-              while (divElement.firstChild) {
-                divElement.removeChild(divElement.firstChild);
-              }
-              divElement.appendChild(imgElement);
-            }catch(e){
-            // ReactNativeWebView.postMessage(e.toString())
-            }
-            true;
-          `)
-        }
-      }
-    }
+    await getPicListThread(imageList, webViewRef)
   }
   const onError = () => {
     console.log('error')
@@ -96,6 +92,6 @@ const WebViewReaderCol: React.FC = ({imageList, paging}) => {
       allowUniversalAccessFromFileURLs={true}
     />
   )
-}
+})
 
 export default memo(WebViewReaderCol)

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Button, View} from "react-native";
 import {appStore} from "../store/appStore";
 import {useSnapshot} from "valtio/react";
@@ -8,7 +8,6 @@ import LoadingModal from "../components/LoadingModal";
 import MainWebView from "../components/MainWebView";
 import Toast from "react-native-root-toast";
 import MyText from "../components/MyText";
-import {VolumeManager} from "react-native-volume-manager";
 
 const LoginWebView: React.FC = () => {
   const [checkingLogin, setCheckingLogin] = useState(false)

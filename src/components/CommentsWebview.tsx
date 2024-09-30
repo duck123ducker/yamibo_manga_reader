@@ -1,4 +1,4 @@
-import React, {createRef, memo, useCallback, useEffect, useMemo, useState} from "react";
+import React, {createRef, useCallback, useEffect, useMemo, useState} from "react";
 import {WebView} from "react-native-webview";
 import {getMobileThreadUrl} from "../constants/urls";
 import {WebViewOpenWindowEvent} from "react-native-webview/lib/WebViewTypes";
@@ -109,7 +109,7 @@ const CommentsWebview: React.FC<{ tid: string, webviewHeight: number }> = ({tid,
       for (let i = 0; i < 100; i++) {
         var elements = document.querySelectorAll('font');
         elements.forEach(el => {
-          if (el.innerHTML.trim() === '<br>' || el.innerHTML.trim() === '') {
+          if (el.innerHTML.trim() === '<br>' || el.innerHTML === '') {
             const newElement = document.createElement('br');
             el.parentNode.replaceChild(newElement, el);
           }

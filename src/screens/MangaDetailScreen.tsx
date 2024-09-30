@@ -1,8 +1,8 @@
-import React, {createRef, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {createRef, useEffect, useMemo, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Keyboard, NativeScrollEvent,
-  NativeSyntheticEvent, Platform,
+  NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -11,22 +11,22 @@ import {
   View,
 } from "react-native";
 import {
-  getThreadAuthorComment, getThreadRateInfo,
+  getThreadRateInfo,
   getThreadsImageListByWebView,
   initDownloadManga,
   px2dp, rateThread,
-  replaceNewlines
 } from "../utils";
 import MangaCoverImage from "../components/MangaCoverImage";
 import MyText from "../components/MyText";
 import {StatusBar} from "expo-status-bar";
-import {appStore} from "../store/appStore";
 import {Feature} from "../../types";
 import {Image} from "expo-image";
 import MyModal from "../components/MyModal";
 import Toast from "react-native-root-toast";
 import CommentsWebview from "../components/CommentsWebview";
 import {HEIGHT, STATUS_BAR_HEIGHT} from "../constants/Dimensions";
+import {getMobileThreadUrl} from "../constants/urls";
+import {HEART_ICON, INTERNET_ICON, SEARCH_ICON} from "../constants/images";
 
 const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation}) => {
   const [loaded, setLoaded] = useState(false)
@@ -57,7 +57,7 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
         setTextInputValue(title.split('】').pop().split(']').pop().split(' ').find(item => item.trim() !== ''))
         setQuickSearchShow(true)
       },
-      icon: require('../../assets/search.png')
+      icon: {uri: SEARCH_ICON}
     },
     {
       title: '评分',
@@ -77,8 +77,15 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
           setQueryRatingStatus(false)
         })
       },
-      icon: require('../../assets/heart.png')
-    }
+      icon: {uri: HEART_ICON}
+    },
+    {
+      title: '源网页',
+      operation: () => {
+        navigation.push('ThreadNativeWebview', {url: getMobileThreadUrl(id)})
+      },
+      icon: { uri: INTERNET_ICON }
+    },
   ]
   const quickSearchModalButtons = [
     {
@@ -228,7 +235,6 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
                              style={styles.ratingOptionInput}
                              placeholder={'选填评分理由'}
                   />
-                  {/*<Image source={require('../../assets/more.png')} style={styles.expandIcon}/>*/}
                 </View>
               </View>
             </>
@@ -252,8 +258,7 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
               </View>
               <View style={styles.downloadReadBtns}>
                 <TouchableOpacity onPress={() => {
-                  navigation.navigate('MangaReader', {imageList: imageList})
-                  appStore.readingPage = 1
+                  navigation.navigate('MangaReader', {imageList: imageList, id})
                 }} style={[styles.container]}>
                   <View style={[styles.downloadReadBtn, styles.downloadBtn]}>
                     <MyText>阅读</MyText>
@@ -266,7 +271,7 @@ const MangaDetailScreen: React.FC<{ route, navigation }> = ({route, navigation})
                   style={[styles.container]}
                 >
                   <View style={[styles.downloadReadBtn, styles.downloadBtn]}>
-                    <MyText>查看/发表评论</MyText>
+                    <MyText>评论区</MyText>
                   </View>
                 </TouchableOpacity>
               </View>

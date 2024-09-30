@@ -9,6 +9,9 @@ import Toast from "react-native-root-toast";
 import * as Application from 'expo-application';
 import * as Linking from 'expo-linking';
 import {appStore} from "../store/appStore";
+import OptionsContainer from "../components/OptionsContainer";
+import {Options} from "../constants/types";
+import {BACK_ICON} from "../constants/images";
 
 const AboutScreen: React.FC = ({navigation}) => {
   const [checking, setChecking] = useState(false)
@@ -29,7 +32,7 @@ const AboutScreen: React.FC = ({navigation}) => {
       })
     }
   }
-  const aboutOptions = [
+  const aboutOptions: Options = [
     {
       description: '300阅读器',
       info: '300阅读器为第三方客户端，与百合会论坛无直接关系'
@@ -79,25 +82,11 @@ const AboutScreen: React.FC = ({navigation}) => {
         <TouchableOpacity onPress={navigation.goBack}
                           style={{height: px2dp(60), width: px2dp(60), position: 'absolute', left: px2dp(20)}}>
           <Image style={{height: px2dp(60), width: px2dp(60)}}
-                 source={require('../../assets/back.png')}/>
+                 source={{uri: BACK_ICON}}/>
         </TouchableOpacity>
         <StatusBar backgroundColor={'#ffe6b7'}/>
       </View>
-      {
-        aboutOptions.map(option => (
-          <View key={option.description}>
-            <TouchableOpacity
-              style={[styles.option]}
-              onPress={() => {
-                option.hasOwnProperty('operation') ? option.operation() : null
-              }}>
-              <MyText style={styles.description}>{option.description}</MyText>
-              {option.hasOwnProperty('info') ? <MyText style={styles.info}>{option.info}</MyText> : null}
-            </TouchableOpacity>
-            <View style={styles.line}/>
-          </View>
-        ))
-      }
+      <OptionsContainer options={aboutOptions}/>
     </ScrollView>
   )
 }
@@ -109,24 +98,6 @@ const styles = StyleSheet.create({
   content: {
     backgroundColor: '#f8f8e0'
   },
-  option: {
-    paddingTop: px2dp(30),
-    paddingBottom: px2dp(30),
-    paddingLeft: px2dp(30),
-    paddingRight: px2dp(30)
-  },
-  description: {
-    fontSize: 16
-  },
-  info: {
-    fontSize: 14,
-    color: '#454545'
-  },
-  line: {
-    height: px2dp(1),
-    width: '100%',
-    backgroundColor: '#d0d0d0'
-  }
 })
 
 export default AboutScreen;

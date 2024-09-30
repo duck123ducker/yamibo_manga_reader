@@ -10,13 +10,13 @@ import {
 import {checkLogin, getNextSearchPage, getTitlesByWebView, px2dp, searchThread, uniqueJsonArray} from "../utils";
 import MangaCoverImageLazyLoad from "./MangaCoverImageLazyLoad";
 import {Image} from "expo-image";
-import LoadingModal from "./LoadingModal";
 import Toast from "react-native-root-toast";
 import MyText from "./MyText";
 import {StatusBar} from "expo-status-bar";
 import Marquee from "./Marquee";
 import {useBackHandler} from '@react-native-community/hooks'
 import {appStore} from "../store/appStore";
+import {MENU_ICON, SEARCH_ICON} from "../constants/images";
 
 const Mangas: React.FC<{ route, navigation }> = ({route, navigation}) => {
   const {routeMode, keyWord} = route.params
@@ -208,7 +208,7 @@ const Mangas: React.FC<{ route, navigation }> = ({route, navigation}) => {
               navigation.openDrawer()
             }}>
               <View style={{height: px2dp(78), width: px2dp(78), alignItems: 'center', justifyContent: 'center'}}>
-                <Image source={require('../../assets/menu.png')} style={{height: '75%', width: '75%'}}/>
+                <Image source={{uri: MENU_ICON}} style={{height: '75%', width: '75%'}}/>
               </View>
             </TouchableOpacity>
             <TextInput allowFontScaling={false} ref={textInputRef} onFocus={onFocus} onBlur={onBlur}
@@ -221,7 +221,7 @@ const Mangas: React.FC<{ route, navigation }> = ({route, navigation}) => {
             }}/>
             <TouchableOpacity onPress={() => search(searchValue)}>
               <View style={{height: px2dp(78), width: px2dp(78), alignItems: 'center', justifyContent: 'center'}}>
-                <Image source={require('../../assets/search.png')} style={{height: '75%', width: '75%'}}/>
+                <Image source={{uri: SEARCH_ICON}} style={{height: '75%', width: '75%'}}/>
               </View>
             </TouchableOpacity>
           </View>

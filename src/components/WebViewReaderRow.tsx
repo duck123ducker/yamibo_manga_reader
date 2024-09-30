@@ -1,11 +1,18 @@
-import React, {createRef, memo, useState} from "react";
-import {appStore} from "../store/appStore";
-import {getPicByWebView} from "../utils";
+import React, {createRef, forwardRef, memo, useImperativeHandle, useState} from "react";
+import {getPicListThread} from "../utils";
 import {WebView} from "react-native-webview";
 import {SWIPER_MIN_CSS, SWIPER_MIN_JS} from "../constants/swiper";
 import {ENUM_ROW_DIRECTION} from "../constants/types";
 
-const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
+const WebViewReaderRow: React.FC = forwardRef(({imageList, paging, readRowDirection, initPage}, ref) => {
+  useImperativeHandle(ref, () => ({
+    prev() {
+      webViewRef.current?.injectJavaScript(`swiper.slidePrev();`)
+    },
+    next() {
+      webViewRef.current?.injectJavaScript(`swiper.slideNext();`)
+    }
+  }));
   const webViewRef = createRef<WebView>();
   const [html, setHtml] = useState((() => {
     let tmp = ''
@@ -13,7 +20,7 @@ const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
       tmp += `    
         <div class="swiper-slide">
           <div id="${index}" class="swiper-zoom-container">
-            <div class="swiper-zoom-target" style="height: calc(100vw * 24 / 17); width: 100vw; font-size: 6vw; display: flex; align-items: center; justify-content: center;">
+            <div class="swiper-zoom-target" style="color: white; height: calc(100vw * 24 / 17); width: 100vw; font-size: 6vw; display: flex; align-items: center; justify-content: center;">
               ${index + 1}
             </div>
           </div>
@@ -72,17 +79,16 @@ const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
           </style>
         </head>
         <body style="padding: 0; margin: 0;">
-          <div ${readRowDirection === ENUM_ROW_DIRECTION.R_TO_L ? 'dir="rtl"' : ''} class="swiper mySwiper swiper-h" style="background: #000000;">
+          <div ${readRowDirection === ENUM_ROW_DIRECTION.R_TO_L ? 'dir="rtl"' : ''} class="swiper mySwiper swiper-h" style="background: #171717;">
             <div class="swiper-wrapper">
               ${tmp}
             </div>
           </div>
           <div class="slider-container" id="slider-container">
-            <div class="progress-text" id="value">1</div>
-            <input type="range" id="slider" min="1" max="${imageList.length}" step="1" value="1">
+            <div class="progress-text" id="value">${initPage}</div>
+            <input type="range" id="slider" min="1" max="${imageList.length}" step="1" value="${initPage}">
             <div class="progress-text">${imageList.length}</div>
           </div>
-          
           
           <script>
             let swipping = false
@@ -91,12 +97,35 @@ const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
             const valueDisplay = document.getElementById('value');
             const swiper = new Swiper('.mySwiper', {
               autoplay: false,
+              initialSlide: ${initPage - 1},
               slidesPerView: 1,
-              zoom: true,
+              zoom: {
+                toggle: false,
+                maxRatio: 5,
+              },
             })
+            setTimeout(() => {
+              swiper.zoom.out();
+              swiper.zoom.in(1.00001);
+            }, 400);
+            let zoomLevel = 1;
+            swiper.on('doubleClick', () => {
+              if (zoomLevel === 1) {
+                  swiper.zoom.in(1.5);
+                  zoomLevel = 1.5;
+              } else if (zoomLevel === 1.5) {
+                  swiper.zoom.in(2.5);
+                  zoomLevel = 2.5;
+              } else {
+                  swiper.zoom.in(1.00001);
+                  zoomLevel = 1;
+              }
+          });
             swiper.on('slideChange', function (swiper) {
+              swiper.zoom.out()
+              swiper.zoom.in(1.00001)
+              zoomLevel = 1
               setInputTest(swiper.activeIndex + 1);
-
               ReactNativeWebView.postMessage(JSON.stringify({
                 'msgType': 'scrollProgress',
                 'msg': {
@@ -111,14 +140,46 @@ const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
             swiper.on('slideChangeTransitionEnd', function () {
               swipping = false
             });
-            function leftClick(){
-              !swipping && swiper.slide${readRowDirection === ENUM_ROW_DIRECTION.R_TO_L ? "Next" : "Prev"}()
+            let timer = null;
+            let clickCount = 0;
+            function leftClick() {
+              if (swipping) return;
+              clickCount++;
+              if (clickCount === 1) {
+                timer = setTimeout(() => {
+                  swiper.slide${readRowDirection === ENUM_ROW_DIRECTION.R_TO_L ? "Next" : "Prev"}();
+                  clickCount = 0;
+                }, 200);
+              } else if (clickCount === 2) {
+                clearTimeout(timer);
+                clickCount = 0;
+              }
             }
             function rightClick() {
-              !swipping && swiper.slide${readRowDirection === ENUM_ROW_DIRECTION.R_TO_L ? "Prev" : "Next"}()
+              if (swipping) return;
+              clickCount++;
+              if (clickCount === 1) {
+                timer = setTimeout(() => {
+                  swiper.slide${readRowDirection === ENUM_ROW_DIRECTION.R_TO_L ? "Prev" : "Next"}()
+                  clickCount = 0;
+                }, 200);
+              } else if (clickCount === 2) {
+                clearTimeout(timer);
+                clickCount = 0;
+              }
             }
             function centerClick() {
-              sliderContainer.style.display = sliderContainer.style.display === "flex" ? "none" : "flex"
+              if (swipping) return;
+              clickCount++;
+              if (clickCount === 1) {
+                timer = setTimeout(() => {
+                  sliderContainer.style.display = sliderContainer.style.display === "flex" ? "none" : "flex"
+                  clickCount = 0;
+                }, 200);
+              } else if (clickCount === 2) {
+                clearTimeout(timer);
+                clickCount = 0;
+              }
             }
             function setInputTest(val) {
               const event = new Event('input');
@@ -146,28 +207,7 @@ const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
     return tmpHtml
   })());
   const onLoadEnd = async () => {
-    appStore.reading = true
-    for (const [index, link] of imageList.entries()) {
-      if (appStore.reading) {
-        const picData = await getPicByWebView(link)
-        if (webViewRef.current) {
-          webViewRef.current.injectJavaScript(`
-            try{
-              var divElement = document.querySelector('div[id="${index}"]');
-              var imgElement = document.createElement('img');
-              imgElement.src = '${picData.result}';
-              while (divElement.firstChild) {
-                divElement.removeChild(divElement.firstChild);
-              }
-              divElement.appendChild(imgElement);
-            }catch(e){
-            // ReactNativeWebView.postMessage(e.toString())
-            }
-            true;
-          `)
-        }
-      }
-    }
+    await getPicListThread(imageList, webViewRef)
   }
   const onError = () => {
     console.log('error')
@@ -201,6 +241,6 @@ const WebViewReaderRow: React.FC = ({imageList, paging, readRowDirection}) => {
       setBuiltInZoomControls={false}
     />
   )
-}
+})
 
 export default memo(WebViewReaderRow)

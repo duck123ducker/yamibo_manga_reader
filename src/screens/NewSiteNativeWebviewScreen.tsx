@@ -1,30 +1,11 @@
-import React, {useCallback, useState} from "react";
-import {WebView} from "react-native-webview";
-import {WebViewOpenWindowEvent} from "react-native-webview/lib/WebViewTypes";
-import {useFocusEffect} from '@react-navigation/native';
+import React from "react";
+import BrowserWebview from "../components/BrowserWebview";
+import {NEW_SITE_URL} from "../constants/urls";
 
 const NewSiteNativeWebviewScreen: React.FC = ({navigation}) => {
-  const [uri, setUri] = useState('https://www.yamibo.com/')
-  const onOpenWindow = (e: WebViewOpenWindowEvent) => {
-    setUri(e.nativeEvent.targetUrl)
-  }
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        setUri('')
-        setImmediate(() => {
-          setUri('https://www.yamibo.com/')
-        })
-      };
-    }, [])
-  );
+
   return (
-    <>
-      <WebView
-        onOpenWindow={onOpenWindow}
-        source={{uri: uri}}
-      />
-    </>
+    <BrowserWebview url={NEW_SITE_URL} navigation={navigation}/>
   )
 }
 
