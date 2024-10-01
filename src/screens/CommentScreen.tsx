@@ -97,7 +97,7 @@ const CommentScreen: React.FC<{ route, navigation }> = ({route, navigation}) => 
           link.setAttribute('target', '_blank');
         }
       });
-      var author = document.querySelector('div.message');
+      var author = document.querySelector('div.plc.cl');
       var links = author.querySelectorAll('a.orange');
       links.forEach(function(link) {
           link.remove();
