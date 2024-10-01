@@ -37,7 +37,18 @@ const CommentScreen: React.FC<{ route, navigation }> = ({route, navigation}) => 
     if(targetUrl.startsWith('http') && !targetUrl.includes('yamibo.com')){
       Linking.openURL(targetUrl)
     }else {
-      if(targetUrl.includes('action=reply')) {
+      // if(targetUrl.includes('action=reply') || targetUrl.includes(id)) {
+      //
+      // }else
+      if(targetUrl.includes('thread-')) {
+        const id = targetUrl.split('-')[1]
+        // @ts-ignore
+        navigation.push('MangaDetailLoading', {id})
+      }else if(targetUrl.includes('mod=tag')) {
+        const id = getQueryValue(targetUrl, 'id')
+        // @ts-ignore
+        navigation.push('Menu', {id})
+      }else {
         webViewRef.current?.injectJavaScript(`
           var aEle = document.createElement('a');
           aEle.href = '${targetUrl}';
@@ -46,14 +57,6 @@ const CommentScreen: React.FC<{ route, navigation }> = ({route, navigation}) => 
           document.body.removeChild(aEle);
         `)
         setLoaded(false)
-      }else if(targetUrl.includes('thread-')) {
-        const id = targetUrl.split('-')[1]
-        // @ts-ignore
-        navigation.push('MangaDetailLoading', {id})
-      }else if(targetUrl.includes('mod=tag')) {
-        const id = getQueryValue(targetUrl, 'id')
-        // @ts-ignore
-        navigation.push('Menu', {id})
       }
     }
   }
