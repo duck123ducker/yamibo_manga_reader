@@ -21,9 +21,10 @@ const AboutScreen: React.FC = ({navigation}) => {
       checkUpdate()
       .then(res => {
         setChecking(false)
-        Toast.show('已是最新版本！', {position: 0})
         if(res.hasUpdate){
           appStore.showUpdateModal(res.data, `${res.data.version}更新`)
+        }else {
+          Toast.show('已是最新版本！', {position: 0})
         }
       })
       .catch(err => {
@@ -39,9 +40,9 @@ const AboutScreen: React.FC = ({navigation}) => {
     },
     {
       description: '作者',
-      info: 'duck123ducker <huster@ducker.com>',
+      info: 'duck123ducker <huster@duck.com>',
       operation: () => {
-        Linking.openURL('huster@ducker.com')
+        Linking.openURL('huster@duck.com')
       }
     },
     {

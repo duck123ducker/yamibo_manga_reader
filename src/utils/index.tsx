@@ -90,13 +90,15 @@ export function getTitlesByWebView(url: String) {
         const aElement = tbody.querySelectorAll('tr')[0].querySelectorAll('th')[0].querySelectorAll('a')[2]
         const author = tbody.querySelectorAll('tr')[0].querySelectorAll('td')[1].querySelectorAll('a')[0]
         const date = tbody.querySelectorAll('tr')[0].querySelectorAll('td')[1].querySelectorAll('span')[0].innerText.trim()
-        threadTitles.push({
-          id: tbody.id.split('_')[1],
-          title: aElement.text.trim(),
-          author: author.getAttribute('href').split('-')[2].split('.')[0],
-          authorName: author.innerText.trim(),
-          date: date
-        })
+        if(aElement != undefined){
+          threadTitles.push({
+            id: tbody.id.split('_')[1],
+            title: aElement.text.trim(),
+            author: author.getAttribute('href').split('-')[2].split('.')[0],
+            authorName: author.innerText.trim(),
+            date: date
+          })
+        }
       });
       resolve(threadTitles);
     })
